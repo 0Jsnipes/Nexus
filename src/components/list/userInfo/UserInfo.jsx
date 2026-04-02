@@ -9,11 +9,7 @@ const Userinfo = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [popupMode, setPopupMode] = useState(""); // "status" or "bio"
   const [inputValue, setInputValue] = useState("");
-  const [isEditingStatus, setIsEditingStatus] = useState(false);
-  const [isEditingBio, setIsEditingBio] = useState(false);
-
-
-  const { currentUser, setCurrentUser, logout, fetchUserInfo } = useUserStore(); // Assuming `setCurrentUser` is available to update the local user object
+  const { currentUser, logout, fetchUserInfo } = useUserStore();
 
   // Handle Firestore updates for status or bio
   const handleSave = async () => {
@@ -38,7 +34,9 @@ const Userinfo = () => {
 
   const handleOpenPopup = (mode) => {
     setPopupMode(mode);
-    setInputValue(""); // Clear the input
+    setInputValue(
+      mode === "status" ? currentUser.status || "" : currentUser.bio || ""
+    );
     setIsPopupOpen(true);
   };
 
@@ -106,29 +104,6 @@ const Userinfo = () => {
               </button>
             </div>
           </div>
-        </div>
-      )}
-      {/* Status Editing Section */}
-      {isEditingStatus && (
-        <div className="edit-status">
-          <input
-            type="text"
-            value={newStatus}
-            onChange={(e) => setNewStatus(e.target.value)}
-            placeholder="Enter new status"
-          />
-          <button onClick={handleSave}>Save Status</button>
-        </div>
-      )}
-      {/* Bio Editing Section */}
-      {isEditingBio && (
-        <div className="edit-bio">
-          <textarea
-            value={newBio}
-            onChange={(e) => setNewBio(e.target.value)}
-            placeholder="Enter new bio"
-          />
-          <button onClick={handleSave}>Save Bio</button>
         </div>
       )}
     </div>

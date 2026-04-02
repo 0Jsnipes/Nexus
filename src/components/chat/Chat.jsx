@@ -16,10 +16,8 @@ import { useChatStore } from "../lib/chatStore";
 import { useUserStore } from "../lib/userStore";
 import upload from "../lib/upload";
 import { format } from "timeago.js";
-import Bottom from "./sections/Bottom";
 
-
-const Chat = () => {
+const Chat = ({ isMobile = false, onBack, onOpenDetail }) => {
   const [chat, setChat] = useState({ messages: [] });
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
@@ -240,6 +238,15 @@ const toggleUserInfo = () => {
   setShowInfo((prev) => !prev);
 };
 
+const handleInfoAction = () => {
+  if (isMobile) {
+    onOpenDetail?.();
+    return;
+  }
+
+  toggleUserInfo();
+};
+
 const handleSend = async () => {
   if (!chatId || (text.trim() === "" && !audioURL && !img.file)) return; // Allow sending if img.file exists
 
@@ -329,19 +336,26 @@ const handleSend = async () => {
     <div className="chat">
       {/* Top Section */}
       <div className="top">
-        <div className="user">
-          <img src={user?.avatar || "./avatar.png"} alt="User Avatar" />
-          <div className="texts">
-            <span>{user?.username}</span>
-            <p>{user?.status || "No status available"}</p>
+        <div className="topContent">
+          {isMobile && (
+            <button type="button" className="mobileNavButton" onClick={onBack}>
+              Chats
+            </button>
+          )}
+          <div className="user">
+            <img src={user?.avatar || "./avatar.png"} alt="User Avatar" />
+            <div className="texts">
+              <span>{user?.username}</span>
+              <p>{user?.status || "No status available"}</p>
+            </div>
           </div>
         </div>
         <div className="icons">
           <img src="./phone.png" alt="Phone"  onClick={handleCall}/>
           <img src="./video.png" alt="Video"  onClick={handleVideoCall}/>
-          <img src="./info.png" alt="Info"    onClick={toggleUserInfo}/>
+          <img src="./info.png" alt="Info"    onClick={handleInfoAction}/>
         </div>
-        {showInfo && (
+        {showInfo && !isMobile && (
   <div className="popup">
     <h3>User Info</h3>
     <p>{user?.bio || "No additional bio information available."}</p>

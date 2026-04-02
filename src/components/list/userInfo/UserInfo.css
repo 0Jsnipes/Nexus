@@ -1,106 +1,117 @@
 .userInfo {
-  padding: 10px;
+  padding: 18px 20px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 30px;
-  margin:0;
+  justify-content: space-between;
+  gap: 16px;
   border-bottom: 1px solid #dddddd35;
-  
 }
-  .user {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    border: none;
-  }
-  
-  .user p, .user h5 {
-    font-size: 12px;
-  /* Remove all margins */
-  }
-  
-  .user p {
-    font-weight: bold;
-  }
-  
-  .user h5 {
-    font-weight: 300;
-    color: #a5a5a5;
-  }
-  
-  
-  
-    .user img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      object-fit: cover;
-      border:none;
-    }
-    
-   
 
-.icons {
+.userInfo .user {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 0 14px;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  border: none;
+}
+
+.userInfo .user img {
+  grid-row: 1 / span 3;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.userInfo .user h2 {
+  font-size: 16px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userInfo .user h5,
+.userInfo .user p {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.userInfo .user h5 {
+  font-weight: 300;
+  color: #a5a5a5;
+}
+
+.userInfo .user p {
+  color: #d7dce9;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.userInfo .icons {
   display: flex;
   align-items: center;
-  gap: 20px;
-  position: relative; /* Ensure positioning is relative to this container */
+  gap: 12px;
+  position: relative;
+  flex-shrink: 0;
 }
-.icons img{
+
+.userInfo .icons img {
   width: 20px;
   height: 20px;
-  gap: 20px;
   cursor: pointer;
 }
 
-.dropdown {
-  position: absolute; /* Position the dropdown absolutely within the .icons container */
-  top: 30px; /* Adjust to place it right below the "more" button */
-  right: 70px; /* Align the dropdown to the right edge of the "more" button */
-  background-color: rgba(17, 25, 40, 0.8);
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+.userInfo .dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 160px;
+  background-color: rgba(17, 25, 40, 0.94);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  z-index: 1000; /* Ensure it appears above other elements */
+  gap: 8px;
+  z-index: 1000;
 }
 
-.dropdown button {
-  background-color:transparent;
+.userInfo .dropdown button {
+  background-color: transparent;
   color: white;
-  padding: 2px;
+  padding: 8px 10px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 12px;
+  text-align: left;
 }
 
-.dropdown button:hover {
+.userInfo .dropdown button:hover {
   background-color: #4a76d7;
 }
 
 .popup-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Transparent dark background */
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 16px;
 }
 
 .popup-box {
-  background: rgba(17, 25, 40, 0.95); /* Matches the current theme */
-  border-radius: 12px;
+  background: rgba(17, 25, 40, 0.95);
+  border-radius: 16px;
   padding: 20px;
-  width: 90%;
-  max-width: 400px;
+  width: min(420px, 100%);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   text-align: center;
 }
@@ -114,9 +125,9 @@
 .popup-box input,
 .popup-box textarea {
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: rgba(255, 255, 255, 0.1);
   color: #fff;
   margin-bottom: 20px;
@@ -126,11 +137,11 @@
 
 .popup-box textarea {
   resize: none;
-  height: 80px;
+  height: 100px;
 }
 
 .popup-box button {
-  background-color: #5183fe; /* Matches the current button style */
+  background-color: #5183fe;
   color: #fff;
   padding: 10px 15px;
   border: none;
@@ -141,10 +152,38 @@
 }
 
 .popup-box button.cancel {
-  background-color: rgba(255, 0, 0, 0.7); /* Red cancel button */
+  background-color: rgba(255, 0, 0, 0.7);
 }
 
 .popup-box button:hover {
   opacity: 0.9;
 }
 
+@media (max-width: 640px) {
+  .userInfo {
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .userInfo .user {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+
+  .userInfo .user img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .userInfo .icons img:not(.more-icon) {
+    display: none;
+  }
+
+  .popup-box {
+    padding: 18px;
+  }
+
+  .popup-box button {
+    width: 100%;
+    margin: 5px 0 0;
+  }
+}

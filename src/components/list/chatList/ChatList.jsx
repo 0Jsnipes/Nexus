@@ -7,7 +7,7 @@ import { db } from "../../lib/firebase"; // Adjusted the path to match the folde
 import { useChatStore } from "../../lib/chatStore";
 
 
-const ChatList = () => {
+const ChatList = ({ onChatSelect }) => {
   const [chats, setChats] = useState([]);
   const [addMode, setAddMode] = useState(false);
   const [input, setInput] = useState("");
@@ -59,14 +59,16 @@ const ChatList = () => {
       await updateDoc(userChatsRef, {
         chats: userChats,
       });
-      changeChat(chat.chatId, chat.user);
     } catch (err) {
       console.log(err);
+    } finally {
+      changeChat(chat.chatId, chat.user);
+      onChatSelect?.();
     }
   };
 
   const filteredChats = chats.filter((c) =>
-    c.user.username.toLowerCase().includes(input.toLowerCase())
+    c.user?.username?.toLowerCase().includes(input.toLowerCase())
   );
 
   return (
@@ -89,11 +91,16 @@ const ChatList = () => {
       </div>
       {filteredChats.map((chat) => (
         <div
-          className="item"
+          className={`item ${chat.chatId === chatId ? "active" : ""}`}
           key={chat.chatId}
           onClick={() => handleSelect(chat)}
           style={{
-            backgroundColor: chat?.isSeen ? "transparent" : "#5183fe",
+            backgroundColor:
+              chat.chatId === chatId
+                ? "rgba(81, 131, 254, 0.25)"
+                : chat?.isSeen
+                ? "transparent"
+                : "#5183fe",
           }}
         >
           <img

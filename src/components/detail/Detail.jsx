@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { onSnapshot, doc, updateDoc, arrayRemove, arrayUnion } from "firebase/firestore";
 import { useChatStore } from "../lib/chatStore";
 import { db, auth } from "../lib/firebase";
+import { useUserStore } from "../lib/userStore";
 import "./detail.css";
 
-const Detail = () => {
+const Detail = ({ isMobile = false, onBack }) => {
   const { chatId, user, isReceiverBlocked, changeBlock } = useChatStore();
+  const { currentUser } = useUserStore();
   const [images, setImages] = useState([]); // Store shared photos
   const [isPhotosOpen, setIsPhotosOpen] = useState(false); // Toggle photos section
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false); // Toggle privacy settings
@@ -43,13 +45,15 @@ const Detail = () => {
   };
 
   const handleBlockUser = async () => {
-    if (!user) return;
+    if (!user || !currentUser) return;
 
-    const userDocRef = doc(db, "users", user.id);
+    const userDocRef = doc(db, "users", currentUser.id);
 
     try {
       await updateDoc(userDocRef, {
-        blocked: isReceiverBlocked ? arrayRemove(chatId) : arrayUnion(chatId),
+        blocked: isReceiverBlocked
+          ? arrayRemove(user.id)
+          : arrayUnion(user.id),
       });
       changeBlock(); // Update block status in store
     } catch (err) {
@@ -69,11 +73,20 @@ const Detail = () => {
 
   return (
     <div className="detail">
+      {isMobile && (
+        <div className="detailMobileHeader">
+          <button type="button" className="mobileNavButton" onClick={onBack}>
+            Back
+          </button>
+          <span>Conversation Details</span>
+        </div>
+      )}
       {/* User Information */}
       <div className="user">
         <img src={user?.avatar || "./avatar.png"} alt="User Avatar" />
         <h2>{user?.username || "Unknown User"}</h2>
         <p>{user?.status || "No status available"}</p>
+        {user?.bio && <span className="userBio">{user.bio}</span>}
       </div>
 
       {/* Shared Photos Section */}
