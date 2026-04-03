@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./userInfo.css";
+import "./UserInfo.css";
 import { useUserStore } from "../../lib/userStore";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
