@@ -20,5 +20,12 @@ export const supabase = createClient(
       persistSession: true,
       autoRefreshToken: true,
     },
+    global: {
+      // Every REST call re-fetches the same URL (e.g. the same messages
+      // query on every send/realtime event) — without this, the browser's
+      // HTTP cache can serve a stale response instead of hitting the
+      // network, so new rows silently never show up.
+      fetch: (input, init = {}) => fetch(input, { ...init, cache: "no-store" }),
+    },
   }
 );

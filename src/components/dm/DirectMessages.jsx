@@ -82,7 +82,7 @@ const DirectMessages = ({ route, navigate }) => {
     navigate("dms", { dmId: conv.id });
   };
 
-  const { messages, sendMessage, editMessage, deleteMessage, toggleReaction } = useMessages({
+  const { messages, error: messagesError, sendMessage, editMessage, deleteMessage, toggleReaction } = useMessages({
     workspaceId: active?.workspace_id,
     dmId,
   });
@@ -146,6 +146,7 @@ const DirectMessages = ({ route, navigate }) => {
             <div className="rooms-messages nx-scroll">
               <MessageList
                 messages={messages}
+                error={messagesError}
                 currentUserId={profile?.id}
                 onReply={setReplyTo}
                 onEdit={(m) => setEditingMessage(m)}

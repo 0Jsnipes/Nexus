@@ -15,17 +15,24 @@ export const useMessages = ({ workspaceId, roomId, dmId, roomName, isPrivateRoom
   const fetchMessages = useCallback(async () => {
     if (!channelKey) return;
     setLoading(true);
+    setError(null);
     let query = supabase
       .from("messages")
-      .select("*, sender:profiles(id, username, avatar_url), attachments:message_attachments(*), reactions:message_reactions(*)")
+      .select(
+        "*, sender:profiles!messages_sender_id_fkey(id, username, avatar_url), attachments:message_attachments(*), reactions:message_reactions(*)"
+      )
       .order("created_at", { ascending: true })
       .limit(200);
 
     query = roomId ? query.eq("room_id", roomId) : query.eq("dm_id", dmId);
 
     const { data, error: err } = await query;
-    if (err) setError(err.message);
-    else setMessages(data || []);
+    if (err) {
+      console.error("Failed to load messages", err);
+      setError(err.message);
+    } else {
+      setMessages(data || []);
+    }
     setLoading(false);
   }, [roomId, dmId, channelKey]);
 
@@ -88,6 +95,10 @@ export const useMessages = ({ workspaceId, roomId, dmId, roomName, isPrivateRoom
         }
       }
 
+      // Re-fetch directly so the sender sees the message even if Realtime is
+      // disconnected or the table is not currently in the publication.
+      await fetchMessages();
+
       notifyNewMessage({
         workspaceId,
         body,
@@ -101,7 +112,7 @@ export const useMessages = ({ workspaceId, roomId, dmId, roomName, isPrivateRoom
 
       return data;
     },
-    [workspaceId, roomId, dmId, roomName, isPrivateRoom, profile]
+    [workspaceId, roomId, dmId, roomName, isPrivateRoom, profile, fetchMessages]
   );
 
   const editMessage = useCallback(async (messageId, body) => {

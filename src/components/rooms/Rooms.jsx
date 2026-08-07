@@ -47,7 +47,7 @@ const Rooms = ({ route, navigate }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.workspace_id]);
 
-  const { messages, sendMessage, editMessage, deleteMessage, toggleReaction } = useMessages({
+  const { messages, error: messagesError, sendMessage, editMessage, deleteMessage, toggleReaction } = useMessages({
     workspaceId: active?.workspace_id,
     roomId,
     roomName: activeRoom?.name,
@@ -133,6 +133,7 @@ const Rooms = ({ route, navigate }) => {
             <div className="rooms-messages nx-scroll">
               <MessageList
                 messages={messages}
+                error={messagesError}
                 currentUserId={profile?.id}
                 onReply={setReplyTo}
                 onEdit={(m) => setEditingMessage(m)}

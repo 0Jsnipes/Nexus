@@ -36,12 +36,16 @@ const groupReactions = (reactions = []) => {
   return map;
 };
 
-const MessageList = ({ messages, currentUserId, onReply, onEdit, onDelete, onReact, emptyLabel }) => {
+const MessageList = ({ messages, error, currentUserId, onReply, onEdit, onDelete, onReact, emptyLabel }) => {
   const endRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
+
+  if (error) {
+    return <div className="nx-error" role="alert">Couldn&apos;t load messages: {error}</div>;
+  }
 
   if (!messages.length) {
     return <EmptyState title="No messages yet" description={emptyLabel || "Start the conversation."} />;
