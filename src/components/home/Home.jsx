@@ -52,8 +52,6 @@ const Home = ({ onEnter }) => {
 
   return (
     <div className="home" ref={rootRef}>
-      <div className="home-grid-overlay" />
-
       <nav className="home-nav">
         <span className="home-mark">
           <Logo size={18} />
@@ -91,6 +89,11 @@ const Home = ({ onEnter }) => {
       <footer className="home-footer">
         <span>Nexus &mdash; controlled chaos, organized.</span>
         <span>&copy; {new Date().getFullYear()} Snipes Systems</span>
+        <span className="home-footer-legal">
+          <a href="#/privacy">Privacy Policy</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="#/terms">Terms of Service</a>
+        </span>
       </footer>
     </div>
   );

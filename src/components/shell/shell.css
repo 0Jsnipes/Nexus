@@ -5,6 +5,9 @@
   height: 100dvh;
   width: 100%;
   background: var(--nx-canvas);
+  /* Keep content clear of notches / home indicators when launched as an
+     installed PWA (no-op in a regular browser tab, where env() is 0). */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 /* Sidebar ---------------------------------------------------------------- */
@@ -158,8 +161,8 @@
 
 .nx-sidebar-badge {
   margin-left: auto;
-  background: var(--nx-accent);
-  color: var(--nx-accent-contrast);
+  background: var(--nx-accent-solid);
+  color: var(--nx-accent-solid-text);
   font-size: 10px;
   font-weight: 700;
   padding: 1px 6px;
@@ -495,7 +498,7 @@
   background: var(--nx-hover-bg);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 640px) {
   .nx-sidebar-desktop {
     display: none;
   }

@@ -4,6 +4,7 @@ import ProfileSettings from "./ProfileSettings";
 import WorkspaceSettings from "./WorkspaceSettings";
 import RolesSettings from "./RolesSettings";
 import AppearanceSettings from "./AppearanceSettings";
+import NotificationSettings from "./NotificationSettings";
 import SecuritySettings from "./SecuritySettings";
 import IntegrationsSettings from "./IntegrationsSettings";
 
@@ -12,6 +13,7 @@ const TABS = [
   { id: "workspace", label: "Workspace" },
   { id: "roles", label: "Roles & Permissions" },
   { id: "appearance", label: "Appearance" },
+  { id: "notifications", label: "Notifications" },
   { id: "integrations", label: "Integrations" },
   { id: "security", label: "Security" },
 ];
@@ -37,6 +39,7 @@ const Settings = ({ route }) => {
           {tab === "workspace" && <WorkspaceSettings />}
           {tab === "roles" && <RolesSettings />}
           {tab === "appearance" && <AppearanceSettings />}
+          {tab === "notifications" && <NotificationSettings />}
           {tab === "integrations" && <IntegrationsSettings />}
           {tab === "security" && <SecuritySettings />}
         </div>

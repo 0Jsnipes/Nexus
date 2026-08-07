@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "./onboarding.css";
 import { useAuthStore } from "../../lib/authStore";
 import { useWorkspaceStore } from "../../lib/workspaceStore";
 import { uploadFile } from "../../lib/storage";
+import { PENDING_JOIN_CODE_KEY, JOIN_ERROR_MESSAGES } from "../../lib/joinWorkspaceCode";
 import Avatar from "../shared/Avatar";
 
 const Onboarding = () => {
@@ -12,6 +13,27 @@ const Onboarding = () => {
   const [logo, setLogo] = useState({ file: null, url: "" });
   const session = useAuthStore((s) => s.session);
   const { createWorkspace, joinWorkspace, logout } = useWorkspaceStoreActions();
+
+  useEffect(() => {
+    const pendingCode = localStorage.getItem(PENDING_JOIN_CODE_KEY);
+    if (!pendingCode) return;
+    localStorage.removeItem(PENDING_JOIN_CODE_KEY);
+    setTab("join");
+    setLoading(true);
+    joinWorkspace(pendingCode)
+      .then((result) => {
+        if (!result.ok) {
+          toast.warn(JOIN_ERROR_MESSAGES[result.error] || "Couldn't join that workspace.");
+        } else if (result.status === "pending") {
+          toast.info(`Request sent to join ${result.name}. Waiting on approval.`);
+        } else {
+          toast.success(`Welcome to ${result.name}!`);
+        }
+      })
+      .catch((err) => toast.error(err.message))
+      .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogo = (e) => {
     const file = e.target.files[0];
@@ -50,12 +72,7 @@ const Onboarding = () => {
     try {
       const result = await joinWorkspace(code.trim());
       if (!result.ok) {
-        const messages = {
-          invalid_code: "That join code doesn't match any workspace.",
-          code_disabled: "This workspace isn't accepting new members right now.",
-          already_member: "You're already a member of this workspace.",
-        };
-        toast.warn(messages[result.error] || "Couldn't join that workspace.");
+        toast.warn(JOIN_ERROR_MESSAGES[result.error] || "Couldn't join that workspace.");
       } else if (result.status === "pending") {
         toast.info(`Request sent to join ${result.name}. Waiting on approval.`);
       } else {

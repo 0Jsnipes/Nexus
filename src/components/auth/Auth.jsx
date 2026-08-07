@@ -3,6 +3,8 @@ import "./auth.css";
 import { toast } from "react-toastify";
 import { supabase } from "../../lib/supabase";
 import { uploadFile } from "../../lib/storage";
+import { useWorkspaceStore } from "../../lib/workspaceStore";
+import { PENDING_JOIN_CODE_KEY, JOIN_ERROR_MESSAGES } from "../../lib/joinWorkspaceCode";
 import Logo from "../shared/Logo";
 
 const PASSWORD_REQUIREMENTS =
@@ -59,7 +61,8 @@ const Auth = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { username, email, password } = Object.fromEntries(new FormData(e.target));
+    const { username, email, password, workspaceCode } = Object.fromEntries(new FormData(e.target));
+    const code = workspaceCode?.trim();
 
     if (!username || !email || !password) {
       setLoading(false);
@@ -94,8 +97,24 @@ const Auth = () => {
     }
 
     if (data.session) {
-      toast.success("Account created! Logging you in...");
+      if (code) {
+        try {
+          const result = await useWorkspaceStore.getState().joinWorkspace(code);
+          if (!result.ok) {
+            toast.warn(JOIN_ERROR_MESSAGES[result.error] || "Account created, but that workspace code didn't work.");
+          } else if (result.status === "pending") {
+            toast.info(`Account created! Request sent to join ${result.name}. Waiting on approval.`);
+          } else {
+            toast.success(`Account created! Welcome to ${result.name}.`);
+          }
+        } catch (err) {
+          toast.error(err.message);
+        }
+      } else {
+        toast.success("Account created! Logging you in...");
+      }
     } else {
+      if (code) localStorage.setItem(PENDING_JOIN_CODE_KEY, code);
       toast.success("Account created! Check your email to confirm before signing in.");
       goTo("signin");
     }
@@ -122,7 +141,6 @@ const Auth = () => {
   return (
     <div className="auth-page">
       <aside className="auth-brand">
-        <div className="auth-brand-grid" />
         <div className="auth-brand-mark">
           <Logo size={20} />
           <span className="auth-brand-wordmark">NEXUS</span>
@@ -197,6 +215,11 @@ const Auth = () => {
                 />
                 <span className="auth-hint">8+ characters with uppercase, lowercase, a number, and a symbol.</span>
               </div>
+              <div className="auth-field">
+                <label htmlFor="signup-code">Workspace code (optional)</label>
+                <input id="signup-code" type="text" placeholder="e.g. 8F3KQ2LM" name="workspaceCode" />
+                <span className="auth-hint">Have an invite code? Enter it to join that workspace automatically.</span>
+              </div>
               <button className="auth-submit" disabled={loading}>{loading ? "Creating account…" : "Create account"}</button>
               <div className="auth-links">
                 <button type="button" className="auth-link" onClick={() => goTo("signin")}>
@@ -219,6 +242,12 @@ const Auth = () => {
                 </button>
               </div>
             </form>
+          )}
+
+          {view !== "forgot" && (
+            <p className="auth-legal">
+              By continuing you agree to our <a href="#/terms">Terms of Service</a> and <a href="#/privacy">Privacy Policy</a>.
+            </p>
           )}
         </div>
       </div>

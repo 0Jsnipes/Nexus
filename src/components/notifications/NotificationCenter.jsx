@@ -31,6 +31,23 @@ const NotificationCenter = ({ navigate }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id, active?.workspace_id]);
 
+  useEffect(() => {
+    if (!profile?.id) return undefined;
+
+    const channel = supabase
+      .channel(`notifications:${profile.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${profile.id}` },
+        ({ new: row }) => {
+          if (row.workspace_id === active?.workspace_id) setItems((prev) => [row, ...prev]);
+        }
+      )
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [profile?.id, active?.workspace_id]);
+
   const markRead = async (item) => {
     if (!item.read_at) {
       await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", item.id);

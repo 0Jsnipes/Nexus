@@ -13,18 +13,6 @@
   isolation: isolate;
 }
 
-.home-grid-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    linear-gradient(var(--nx-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--nx-border) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, black 0%, transparent 70%);
-  opacity: 0.7;
-}
-
 .home-nav {
   display: flex;
   align-items: center;
@@ -119,17 +107,17 @@
   padding: 0 28px;
   font-size: var(--nx-text-md);
   font-weight: 600;
-  color: var(--nx-accent-contrast);
-  background: var(--nx-accent);
-  border: 1px solid var(--nx-accent);
+  color: var(--nx-accent-solid-text);
+  background: var(--nx-accent-solid);
+  border: 1px solid var(--nx-accent-solid);
   border-radius: var(--nx-radius-sm);
   cursor: pointer;
   transition: background var(--nx-duration-fast) var(--nx-ease), transform var(--nx-duration-fast) var(--nx-ease);
 }
 
 .home-cta:hover {
-  background: var(--nx-accent-strong);
-  border-color: var(--nx-accent-strong);
+  background: var(--nx-accent-solid-hover);
+  border-color: var(--nx-accent-solid-hover);
   transform: translateY(-1px);
 }
 
@@ -145,7 +133,10 @@
   max-width: 1200px;
   margin: 0 auto 72px;
   width: 100%;
-  box-sizing: content-box;
+  /* overflow:hidden (needed for the rounded-corner clip) strips this
+     item's content-based automatic min-height in a flex column, so
+     .home-hero's flex-grow was crushing this down instead of scrolling. */
+  flex-shrink: 0;
 }
 
 .home-feature-card {
@@ -187,6 +178,23 @@
   font-size: var(--nx-text-xs);
   color: var(--nx-text-muted);
   text-align: center;
+}
+
+.home-footer-legal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.home-footer-legal a {
+  color: var(--nx-text-muted);
+  text-decoration: none;
+}
+
+.home-footer-legal a:hover {
+  color: var(--nx-text);
+  text-decoration: underline;
 }
 
 @media (max-width: 640px) {

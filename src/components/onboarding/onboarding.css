@@ -136,14 +136,14 @@
 }
 
 .onboarding-page .nx-btn-primary {
-  border-color: var(--nx-accent);
-  color: var(--nx-accent-contrast);
-  background: var(--nx-accent);
+  border-color: var(--nx-accent-solid);
+  color: var(--nx-accent-solid-text);
+  background: var(--nx-accent-solid);
 }
 
 .onboarding-page .nx-btn-primary:hover {
-  background: var(--nx-accent-strong);
-  border-color: var(--nx-accent-strong);
+  background: var(--nx-accent-solid-hover);
+  border-color: var(--nx-accent-solid-hover);
 }
 
 .onboarding-page .nx-btn:disabled {

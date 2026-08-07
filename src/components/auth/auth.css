@@ -9,6 +9,7 @@
   background: var(--nx-canvas);
   color: var(--nx-text);
   overflow: hidden;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 /* Left brand panel ---------------------------------------------------------- */
@@ -23,18 +24,6 @@
   background: var(--nx-surface-1);
   border-right: 1px solid var(--nx-border);
   overflow: hidden;
-}
-
-.auth-brand-grid {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-image:
-    linear-gradient(var(--nx-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--nx-border) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(ellipse 70% 60% at 30% 30%, black 0%, transparent 75%);
-  opacity: 0.6;
 }
 
 .auth-brand-mark {
@@ -167,10 +156,10 @@
 .auth-submit {
   height: var(--nx-control-h-lg);
   margin-top: 4px;
-  border: 1px solid var(--nx-accent);
+  border: 1px solid var(--nx-accent-solid);
   border-radius: var(--nx-radius-sm);
-  background: var(--nx-accent);
-  color: var(--nx-accent-contrast);
+  background: var(--nx-accent-solid);
+  color: var(--nx-accent-solid-text);
   font-size: var(--nx-text-sm);
   font-weight: 600;
   cursor: pointer;
@@ -178,8 +167,8 @@
 }
 
 .auth-submit:hover {
-  background: var(--nx-accent-strong);
-  border-color: var(--nx-accent-strong);
+  background: var(--nx-accent-solid-hover);
+  border-color: var(--nx-accent-solid-hover);
 }
 
 .auth-submit:disabled {
@@ -250,6 +239,22 @@
 .auth-link-primary {
   color: var(--nx-accent);
   font-weight: 600;
+}
+
+.auth-legal {
+  margin-top: 20px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--nx-text-muted);
+  text-align: center;
+}
+
+.auth-legal a {
+  color: var(--nx-text-secondary);
+}
+
+.auth-legal a:hover {
+  color: var(--nx-text);
 }
 
 @media (min-width: 900px) {

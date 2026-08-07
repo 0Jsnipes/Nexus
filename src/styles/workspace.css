@@ -61,14 +61,14 @@
 }
 
 .nx-btn-primary {
-  background: var(--nx-accent);
-  border-color: var(--nx-accent);
-  color: var(--nx-accent-contrast);
+  background: var(--nx-accent-solid);
+  border-color: var(--nx-accent-solid);
+  color: var(--nx-accent-solid-text);
 }
 
 .nx-btn-primary:hover {
-  background: var(--nx-accent-strong);
-  border-color: var(--nx-accent-strong);
+  background: var(--nx-accent-solid-hover);
+  border-color: var(--nx-accent-solid-hover);
 }
 
 .nx-btn-danger {
@@ -432,6 +432,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: var(--nx-space-4);
   margin-bottom: var(--nx-space-6);
 }

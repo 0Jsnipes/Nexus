@@ -10,7 +10,7 @@ import MessageComposer from "../messaging/MessageComposer";
 import EmptyState from "../shared/EmptyState";
 import Modal from "../shared/Modal";
 import Avatar from "../shared/Avatar";
-import { FiPlus, FiUsers } from "react-icons/fi";
+import { FiArrowLeft, FiPlus, FiUsers } from "react-icons/fi";
 
 const conversationLabel = (conversation, currentUserId) => {
   if (conversation.is_group) return conversation.name || "Group";
@@ -100,7 +100,7 @@ const DirectMessages = ({ route, navigate }) => {
   if (!active) return null;
 
   return (
-    <div className="rooms-layout">
+    <div className={`rooms-layout ${activeConversation ? "has-active" : ""}`}>
       <aside className="rooms-sidebar">
         <div className="rooms-sidebar-header">
           <h3>Direct Messages</h3>
@@ -133,6 +133,14 @@ const DirectMessages = ({ route, navigate }) => {
         ) : (
           <>
             <div className="rooms-header">
+              <button
+                type="button"
+                className="nx-icon-btn rooms-back"
+                onClick={() => navigate("dms", {})}
+                aria-label="Back to conversations"
+              >
+                <FiArrowLeft size={16} />
+              </button>
               <h2>{conversationLabel(activeConversation, profile?.id)}</h2>
             </div>
             <div className="rooms-messages nx-scroll">

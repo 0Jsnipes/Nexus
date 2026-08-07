@@ -9,7 +9,7 @@ import MessageList from "../messaging/MessageList";
 import MessageComposer from "../messaging/MessageComposer";
 import EmptyState from "../shared/EmptyState";
 import Modal from "../shared/Modal";
-import { FiHash, FiLock, FiPlus, FiSearch } from "react-icons/fi";
+import { FiArrowLeft, FiHash, FiLock, FiPlus, FiSearch } from "react-icons/fi";
 
 const Rooms = ({ route, navigate }) => {
   const [rooms, setRooms] = useState([]);
@@ -51,6 +51,7 @@ const Rooms = ({ route, navigate }) => {
     workspaceId: active?.workspace_id,
     roomId,
     roomName: activeRoom?.name,
+    isPrivateRoom: activeRoom?.is_private,
   });
 
   const filteredRooms = rooms.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()));
@@ -67,7 +68,7 @@ const Rooms = ({ route, navigate }) => {
   if (!active) return null;
 
   return (
-    <div className="rooms-layout">
+    <div className={`rooms-layout ${activeRoom ? "has-active" : ""}`}>
       <aside className="rooms-sidebar">
         <div className="rooms-sidebar-header">
           <h3>Rooms</h3>
@@ -116,6 +117,14 @@ const Rooms = ({ route, navigate }) => {
         ) : (
           <>
             <div className="rooms-header">
+              <button
+                type="button"
+                className="nx-icon-btn rooms-back"
+                onClick={() => navigate("rooms", {})}
+                aria-label="Back to rooms"
+              >
+                <FiArrowLeft size={16} />
+              </button>
               <div>
                 <h2>{activeRoom.is_private ? <FiLock size={14} /> : <FiHash size={14} />} {activeRoom.name}</h2>
                 {activeRoom.topic && <p className="nx-muted">{activeRoom.topic}</p>}

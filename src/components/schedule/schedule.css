@@ -41,8 +41,8 @@
 }
 
 .calendar-day.is-today .calendar-day-num {
-  background: var(--nx-accent);
-  color: var(--nx-accent-contrast);
+  background: var(--nx-accent-solid);
+  color: var(--nx-accent-solid-text);
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -96,4 +96,27 @@
 
 .agenda-item:hover {
   border-color: var(--nx-border-strong);
+}
+
+@media (max-width: 560px) {
+  /* Seven text columns don't fit a phone width — keep the familiar month
+     grid but collapse each day's event chips to dots; the agenda list
+     below still carries the readable titles. */
+  .calendar-weekday {
+    padding: 4px 2px;
+    font-size: 10px;
+  }
+  .calendar-day {
+    min-height: 52px;
+    padding: 4px;
+    gap: 3px;
+  }
+  .calendar-chip {
+    width: 6px;
+    height: 6px;
+    padding: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    text-indent: -999px;
+  }
 }

@@ -1,11 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../lib/authStore";
-import { notifyMentions } from "../../lib/notify";
+import { notifyNewMessage } from "../../lib/notify";
 
 // Shared message subsystem for both Rooms and Direct Messages.
 // Pass exactly one of { roomId } or { dmId }.
-export const useMessages = ({ workspaceId, roomId, dmId, roomName }) => {
+export const useMessages = ({ workspaceId, roomId, dmId, roomName, isPrivateRoom }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -88,7 +88,7 @@ export const useMessages = ({ workspaceId, roomId, dmId, roomName }) => {
         }
       }
 
-      notifyMentions({
+      notifyNewMessage({
         workspaceId,
         body,
         senderId: profile.id,
@@ -96,11 +96,12 @@ export const useMessages = ({ workspaceId, roomId, dmId, roomName }) => {
         roomId,
         dmId,
         roomName,
+        isPrivateRoom,
       });
 
       return data;
     },
-    [workspaceId, roomId, dmId, roomName, profile]
+    [workspaceId, roomId, dmId, roomName, isPrivateRoom, profile]
   );
 
   const editMessage = useCallback(async (messageId, body) => {
