@@ -21,7 +21,9 @@ const Settings = ({ route }) => {
 
   return (
     <div className="nx-page settings-page">
-      <h2 style={{ marginBottom: 16 }}>Settings</h2>
+      <div className="nx-page-header" style={{ marginBottom: 24 }}>
+        <h2>Settings</h2>
+      </div>
       <div className="settings-layout">
         <nav className="settings-nav">
           {TABS.map((t) => (

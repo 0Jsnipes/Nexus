@@ -9,10 +9,11 @@
 }
 
 .task-board-col {
-  width: 240px;
+  width: 260px;
   flex-shrink: 0;
-  background: var(--nx-bg-subtle);
-  border-radius: var(--nx-radius-md);
+  background: var(--nx-surface-2);
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius-lg);
   display: flex;
   flex-direction: column;
   max-height: 100%;
@@ -20,10 +21,14 @@
 
 .task-board-col-header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: var(--nx-text-xs);
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: var(--nx-text-secondary);
+  border-bottom: 1px solid var(--nx-border);
 }
 
 .task-board-col-body {
@@ -36,15 +41,28 @@
 }
 
 .task-card {
-  background: var(--nx-bg);
+  background: var(--nx-surface-1);
   border: 1px solid var(--nx-border);
-  border-radius: var(--nx-radius-sm);
+  border-radius: var(--nx-radius-md);
   padding: 10px;
   cursor: grab;
+  transition: border-color var(--nx-duration-fast) var(--nx-ease);
+}
+
+.task-card:hover {
+  border-color: var(--nx-border-strong);
+}
+
+.task-card.is-blocked {
+  border-left: 2px solid var(--nx-danger);
+}
+
+.task-card.is-urgent {
+  border-left: 2px solid var(--nx-warning);
 }
 
 .task-card-title {
-  font-size: 13px;
+  font-size: var(--nx-text-sm);
   font-weight: 600;
   margin-bottom: 6px;
 }
@@ -64,24 +82,27 @@
 
 .task-table th {
   text-align: left;
-  font-size: 11px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--nx-text-faint);
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--nx-border);
-}
-
-.task-table td {
+  color: var(--nx-text-muted);
   padding: 8px 10px;
   border-bottom: 1px solid var(--nx-border);
 }
 
-.task-table tr {
-  cursor: pointer;
+.task-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--nx-border);
 }
 
-.task-table tr:hover td {
-  background: var(--nx-bg-subtle);
+.task-table tbody tr {
+  cursor: pointer;
+  transition: background var(--nx-duration-fast) var(--nx-ease);
+}
+
+.task-table tbody tr:hover td {
+  background: var(--nx-hover-bg);
 }
 
 .task-overdue {

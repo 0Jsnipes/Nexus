@@ -1,0 +1,170 @@
+/* Nexus design tokens — Precision Tech system. Shared by the authenticated
+   app shell, auth, and public marketing surfaces so every screen reads as
+   one product. */
+
+:root {
+  /* Typography ------------------------------------------------------- */
+  --font-sans: "Geist Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --nx-text-2xs: 11px;
+  --nx-text-xs: 12px;
+  --nx-text-sm: 13px;
+  --nx-text-md: 14px;
+  --nx-text-lg: 15px;
+  --nx-text-xl: 16px;
+  --nx-text-2xl: 20px;
+  --nx-text-3xl: 24px;
+
+  /* Spacing ------------------------------------------------------------ */
+  --nx-space-1: 4px;
+  --nx-space-2: 6px;
+  --nx-space-3: 8px;
+  --nx-space-4: 12px;
+  --nx-space-5: 16px;
+  --nx-space-6: 20px;
+  --nx-space-7: 24px;
+  --nx-space-8: 32px;
+  --nx-space-9: 40px;
+  --nx-space-10: 48px;
+
+  /* Radii ---------------------------------------------------------------- */
+  --nx-radius-sm: 6px;
+  --nx-radius-md: 8px;
+  --nx-radius-lg: 10px;
+  --nx-radius-xl: 12px;
+  --nx-radius-pill: 999px;
+
+  /* Control sizing --------------------------------------------------- */
+  --nx-control-h-sm: 26px;
+  --nx-control-h-md: 32px;
+  --nx-control-h-lg: 38px;
+  --nx-sidebar-w: 240px;
+  --nx-sidebar-w-collapsed: 60px;
+  --nx-topbar-h: 52px;
+
+  /* Motion ------------------------------------------------------------- */
+  --nx-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --nx-duration-fast: 120ms;
+  --nx-duration-md: 160ms;
+  --nx-duration-slow: 220ms;
+
+  /* Z-index scale -------------------------------------------------------- */
+  --nx-z-dropdown: 80;
+  --nx-z-drawer: 150;
+  --nx-z-overlay: 190;
+  --nx-z-modal: 200;
+  --nx-z-toast: 300;
+  --nx-z-tooltip: 320;
+
+  /* Semantic states -------------------------------------------------- */
+  --nx-danger: #e5484d;
+  --nx-danger-bg: rgba(229, 72, 77, 0.12);
+  --nx-success: #2fb573;
+  --nx-success-bg: rgba(47, 181, 115, 0.12);
+  --nx-warning: #d99a26;
+  --nx-warning-bg: rgba(217, 154, 38, 0.14);
+  --nx-info: #40c4ff;
+  --nx-info-bg: rgba(64, 196, 255, 0.12);
+}
+
+/* Dark (default) ---------------------------------------------------------- */
+:root,
+:root[data-theme="dark"] {
+  --nx-canvas: #0b0d10;
+  --nx-surface-1: #101318;
+  --nx-surface-2: #151920;
+  --nx-surface-3: #1b2028;
+  --nx-border: #252b35;
+  --nx-border-strong: #343c49;
+  --nx-text: #f4f7fa;
+  --nx-text-secondary: #a1a9b5;
+  --nx-text-muted: #69727f;
+  --nx-accent: #40c4ff;
+  --nx-accent-strong: #6fd4ff;
+  --nx-accent-contrast: #04141c;
+  --nx-accent-bg: rgba(64, 196, 255, 0.12);
+  --nx-selected-bg: rgba(64, 196, 255, 0.14);
+  --nx-hover-bg: rgba(255, 255, 255, 0.045);
+  --nx-focus-ring: #40c4ff;
+  --nx-disabled-opacity: 0.45;
+  --nx-overlay: rgba(4, 6, 9, 0.6);
+  --nx-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --nx-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --nx-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.6);
+
+  color-scheme: dark;
+}
+
+/* Light --------------------------------------------------------------- */
+:root[data-theme="light"] {
+  --nx-canvas: #f6f8fa;
+  --nx-surface-1: #ffffff;
+  --nx-surface-2: #f1f4f7;
+  --nx-surface-3: #e9eef3;
+  --nx-border: #dfe4ea;
+  --nx-border-strong: #ccd3dc;
+  --nx-text: #15181d;
+  --nx-text-secondary: #626b77;
+  --nx-text-muted: #89929e;
+  --nx-accent: #008ed6;
+  --nx-accent-strong: #0077b3;
+  --nx-accent-contrast: #ffffff;
+  --nx-accent-bg: rgba(0, 142, 214, 0.08);
+  --nx-selected-bg: rgba(0, 142, 214, 0.1);
+  --nx-hover-bg: rgba(15, 24, 33, 0.04);
+  --nx-focus-ring: #008ed6;
+  --nx-disabled-opacity: 0.45;
+  --nx-overlay: rgba(15, 20, 26, 0.35);
+  --nx-shadow-sm: 0 1px 2px rgba(20, 24, 30, 0.06);
+  --nx-shadow-md: 0 8px 24px rgba(20, 24, 30, 0.1);
+  --nx-shadow-lg: 0 16px 40px rgba(20, 24, 30, 0.14);
+  --nx-danger-bg: rgba(229, 72, 77, 0.08);
+  --nx-success-bg: rgba(47, 181, 115, 0.08);
+  --nx-warning-bg: rgba(217, 154, 38, 0.1);
+  --nx-info-bg: rgba(0, 142, 214, 0.08);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]):not([data-theme="light"]) {
+    --nx-canvas: #f6f8fa;
+    --nx-surface-1: #ffffff;
+    --nx-surface-2: #f1f4f7;
+    --nx-surface-3: #e9eef3;
+    --nx-border: #dfe4ea;
+    --nx-border-strong: #ccd3dc;
+    --nx-text: #15181d;
+    --nx-text-secondary: #626b77;
+    --nx-text-muted: #89929e;
+    --nx-accent: #008ed6;
+    --nx-accent-strong: #0077b3;
+    --nx-accent-contrast: #ffffff;
+    --nx-accent-bg: rgba(0, 142, 214, 0.08);
+    --nx-selected-bg: rgba(0, 142, 214, 0.1);
+    --nx-hover-bg: rgba(15, 24, 33, 0.04);
+    --nx-focus-ring: #008ed6;
+    --nx-overlay: rgba(15, 20, 26, 0.35);
+    --nx-shadow-sm: 0 1px 2px rgba(20, 24, 30, 0.06);
+    --nx-shadow-md: 0 8px 24px rgba(20, 24, 30, 0.1);
+    --nx-shadow-lg: 0 16px 40px rgba(20, 24, 30, 0.14);
+    --nx-danger-bg: rgba(229, 72, 77, 0.08);
+    --nx-success-bg: rgba(47, 181, 115, 0.08);
+    --nx-warning-bg: rgba(217, 154, 38, 0.1);
+    --nx-info-bg: rgba(0, 142, 214, 0.08);
+
+    color-scheme: light;
+  }
+}
+
+/* Legacy aliases ---------------------------------------------------------
+   Kept so existing feature CSS (written against the old flatter palette)
+   renders correctly against the new token set without a full rewrite. */
+:root {
+  --nx-bg: var(--nx-surface-1);
+  --nx-bg-subtle: var(--nx-surface-2);
+  --nx-bg-muted: var(--nx-surface-3);
+  --nx-text-faint: var(--nx-text-muted);
+  --nx-shadow: var(--nx-shadow-sm);
+}

@@ -13,19 +13,25 @@
   gap: 12px;
   padding: 10px 12px;
   border: 1px solid var(--nx-border);
-  border-radius: var(--nx-radius-sm);
-  background: var(--nx-bg);
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-surface-1);
   text-align: left;
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--nx-text-sm);
+  transition: border-color var(--nx-duration-fast) var(--nx-ease), background var(--nx-duration-fast) var(--nx-ease);
+}
+
+.notif-item:hover {
+  border-color: var(--nx-border-strong);
 }
 
 .notif-item.is-unread {
-  border-left: 3px solid var(--nx-accent);
-  background: var(--nx-bg-subtle);
+  border-left: 2px solid var(--nx-accent);
+  background: var(--nx-selected-bg);
 }
 
 .notif-item p {
-  font-size: 12px;
+  font-size: var(--nx-text-xs);
+  color: var(--nx-text-secondary);
   margin-top: 2px;
 }

@@ -39,8 +39,13 @@ const Meetings = () => {
   }, [active?.workspace_id]);
 
   const now = new Date();
-  const upcoming = meetings.filter((m) => new Date(m.starts_at) >= now);
-  const past = meetings.filter((m) => new Date(m.starts_at) < now);
+  const isLive = (m) => {
+    const start = new Date(m.starts_at);
+    const end = new Date(start.getTime() + (m.duration_minutes || 30) * 60000);
+    return now >= start && now <= end;
+  };
+  const upcoming = meetings.filter((m) => new Date(m.starts_at) >= now || isLive(m));
+  const past = meetings.filter((m) => new Date(m.starts_at) < now && !isLive(m));
 
   const joinMeeting = async (meeting) => {
     const provider = getVideoProvider(meeting.provider);
@@ -92,9 +97,13 @@ const Meetings = () => {
       {upcoming.length === 0 ? <EmptyState title="No upcoming meetings" /> : (
         <div className="meetings-list">
           {upcoming.map((m) => (
-            <div key={m.id} className="meeting-card">
+            <div key={m.id} className={`meeting-card ${isLive(m) ? "is-live" : ""}`}>
               <div>
-                <strong>{m.title}</strong>
+                <div className="nx-row" style={{ gap: 6 }}>
+                  {isLive(m) && <span className="nx-status-dot nx-status-dot-danger nx-status-dot-live" />}
+                  <strong>{m.title}</strong>
+                  {isLive(m) && <span className="nx-badge nx-badge-danger">Live</span>}
+                </div>
                 <div className="nx-muted meeting-meta"><FiClock size={12} /> {new Date(m.starts_at).toLocaleString()} · {m.duration_minutes}m</div>
               </div>
               <div className="nx-row">

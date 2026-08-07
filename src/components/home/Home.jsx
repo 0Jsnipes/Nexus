@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import "./home.css";
 import { animate, stagger } from "animejs";
 import { FiZap, FiUsers, FiMessageSquare, FiShield } from "react-icons/fi";
+import Logo from "../shared/Logo";
 
 const FEATURES = [
   {
@@ -30,43 +31,47 @@ const Home = ({ onEnter }) => {
   const rootRef = useRef(null);
 
   useEffect(() => {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     animate(".home-eyebrow, .home-title, .home-tagline, .home-cta", {
       opacity: [0, 1],
-      translateY: [24, 0],
-      delay: stagger(120),
-      duration: 900,
-      easing: "easeOutExpo",
+      translateY: [16, 0],
+      delay: stagger(90),
+      duration: 500,
+      easing: "easeOutQuad",
     });
 
     animate(".home-feature-card", {
       opacity: [0, 1],
-      translateY: [30, 0],
-      delay: stagger(100, { start: 500 }),
-      duration: 700,
-      easing: "easeOutExpo",
+      translateY: [12, 0],
+      delay: stagger(70, { start: 350 }),
+      duration: 400,
+      easing: "easeOutQuad",
     });
   }, []);
 
   return (
     <div className="home" ref={rootRef}>
-      <div className="home-glow home-glow-a" />
-      <div className="home-glow home-glow-b" />
       <div className="home-grid-overlay" />
 
       <nav className="home-nav">
-        <span className="home-wordmark">NEXUS</span>
+        <span className="home-mark">
+          <Logo size={18} />
+          <span className="home-wordmark">NEXUS</span>
+        </span>
         <button type="button" className="home-nav-cta" onClick={onEnter}>
           Sign In
         </button>
       </nav>
 
       <main className="home-hero">
-        <span className="home-eyebrow">by Snipes Systems</span>
+        <span className="home-eyebrow">Snipes Systems</span>
         <h1 className="home-title">
-          NEXUS
+          Communication. Work. <span>Organized.</span>
         </h1>
         <p className="home-tagline">
-          Communication. Work. Organized.
+          One fast, focused workspace for rooms, projects, tasks, scheduling, and files —
+          built for teams that move quickly.
         </p>
         <button type="button" className="home-cta" onClick={onEnter}>
           Enter Nexus

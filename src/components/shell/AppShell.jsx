@@ -10,6 +10,7 @@ import Dashboard from "../dashboard/Dashboard";
 import Rooms from "../rooms/Rooms";
 import DirectMessages from "../dm/DirectMessages";
 import Projects from "../projects/Projects";
+import MyTasks from "../tasks/MyTasks";
 import Schedule from "../schedule/Schedule";
 import Meetings from "../meetings/Meetings";
 import Files from "../files/Files";
@@ -22,6 +23,7 @@ const SECTION_COMPONENTS = {
   rooms: Rooms,
   dms: DirectMessages,
   projects: Projects,
+  tasks: MyTasks,
   schedule: Schedule,
   meetings: Meetings,
   files: Files,

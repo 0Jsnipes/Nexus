@@ -7,7 +7,7 @@ import Notification from "./components/notifications/Notification";
 import { NavProvider } from "./lib/NavContext";
 import { useAuthStore } from "./lib/authStore";
 import { useWorkspaceStore } from "./lib/workspaceStore";
-import { applyTheme, getStoredTheme } from "./lib/theme";
+import { applyTheme, getStoredTheme, watchSystemTheme } from "./lib/theme";
 
 // Installed PWA launches carry ?src=pwa (see public/manifest.json start_url)
 // so returning users skip the marketing homepage and land straight on sign-in.
@@ -26,7 +26,9 @@ const App = () => {
 
   useEffect(() => {
     applyTheme(getStoredTheme());
+    const unwatch = watchSystemTheme();
     initAuth();
+    return unwatch;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

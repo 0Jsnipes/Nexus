@@ -4,34 +4,40 @@
 
 .settings-layout {
   display: flex;
-  gap: 24px;
+  gap: 32px;
+  align-items: flex-start;
 }
 
 .settings-nav {
-  width: 180px;
+  width: 192px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  position: sticky;
+  top: 0;
 }
 
 .settings-nav-item {
   text-align: left;
-  padding: 8px 10px;
+  height: 32px;
+  padding: 0 10px;
   border: none;
   background: none;
   border-radius: var(--nx-radius-sm);
-  font-size: 13px;
-  color: var(--nx-text-muted);
+  font-size: var(--nx-text-sm);
+  color: var(--nx-text-secondary);
   cursor: pointer;
+  transition: background var(--nx-duration-fast) var(--nx-ease), color var(--nx-duration-fast) var(--nx-ease);
 }
 
 .settings-nav-item:hover {
-  background: var(--nx-bg-subtle);
+  background: var(--nx-hover-bg);
+  color: var(--nx-text);
 }
 
 .settings-nav-item.is-active {
-  background: var(--nx-bg-muted);
+  background: var(--nx-selected-bg);
   color: var(--nx-text);
   font-weight: 600;
 }
@@ -39,8 +45,9 @@
 .settings-content {
   flex: 1;
   min-width: 0;
-  max-width: 520px;
+  max-width: 560px;
 }
+
 
 .settings-form {
   display: flex;

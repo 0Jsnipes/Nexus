@@ -57,6 +57,7 @@
 
 .msg-time {
   font-size: 11px;
+  font-family: var(--font-mono);
   color: var(--nx-text-faint);
 }
 
@@ -158,7 +159,8 @@
 
 .msg-composer {
   border-top: 1px solid var(--nx-border);
-  padding: 10px 16px;
+  padding: 12px 16px 14px;
+  background: var(--nx-surface-1);
 }
 
 .msg-composer-reply,
@@ -180,21 +182,32 @@
   gap: 6px;
 }
 
+.msg-composer-row {
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-surface-2);
+  box-shadow: var(--nx-shadow-sm);
+  padding: 6px;
+  transition: border-color var(--nx-duration-fast) var(--nx-ease);
+}
+
+.msg-composer-row:focus-within {
+  border-color: var(--nx-accent);
+}
+
 .msg-composer-input {
   flex: 1;
   resize: none;
-  border: 1px solid var(--nx-border);
-  border-radius: var(--nx-radius-sm);
-  padding: 8px 10px;
+  border: none;
+  padding: 6px 8px;
   font-size: 13.5px;
-  background: var(--nx-bg);
+  background: none;
   color: var(--nx-text);
   max-height: 140px;
 }
 
 .msg-composer-input:focus {
-  outline: 2px solid var(--nx-accent);
-  outline-offset: -1px;
+  outline: none;
 }
 
 .msg-composer-emoji {

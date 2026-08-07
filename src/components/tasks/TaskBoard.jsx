@@ -29,7 +29,7 @@ const TaskBoard = ({ tasks, onOpenTask, onStatusChange }) => {
               .map((task) => (
                 <div
                   key={task.id}
-                  className="task-card"
+                  className={`task-card ${col.value === "blocked" ? "is-blocked" : ""} ${task.priority === "urgent" && col.value !== "blocked" ? "is-urgent" : ""}`}
                   draggable
                   onDragStart={() => setDragId(task.id)}
                   onClick={() => onOpenTask(task)}

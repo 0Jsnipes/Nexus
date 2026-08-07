@@ -3,27 +3,34 @@ import "./auth.css";
 import { toast } from "react-toastify";
 import { supabase } from "../../lib/supabase";
 import { uploadFile } from "../../lib/storage";
+import Logo from "../shared/Logo";
 
 const PASSWORD_REQUIREMENTS =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
-const CUBE_ROTATION = {
-  signin: 0,
-  signup: -90,
-  forgot: 90,
+const COPY = {
+  signin: {
+    title: "Welcome back",
+    subtitle: "Sign in to pick up where your team left off.",
+  },
+  signup: {
+    title: "Create your account",
+    subtitle: "Set up your workspace for communication, work, and files.",
+  },
+  forgot: {
+    title: "Reset your password",
+    subtitle: "We'll email you a link to get back in.",
+  },
 };
 
 const Auth = () => {
   const [view, setView] = useState("signin"); // "signin" | "signup" | "forgot"
-  const [zooming, setZooming] = useState(false);
   const [avatar, setAvatar] = useState({ file: null, url: "" });
   const [loading, setLoading] = useState(false);
 
   const goTo = (nextView) => {
     if (nextView === view) return;
-    setZooming(true);
     setView(nextView);
-    window.setTimeout(() => setZooming(false), 900);
   };
 
   const handleAvatar = (e) => {
@@ -110,85 +117,109 @@ const Auth = () => {
     setLoading(false);
   };
 
+  const { title, subtitle } = COPY[view];
+
   return (
     <div className="auth-page">
-      <div className={`auth-cube-stage ${zooming ? "is-zooming" : ""}`}>
-        <div
-          className="auth-cube"
-          style={{ transform: `rotateY(${CUBE_ROTATION[view]}deg)` }}
-        >
-          <div
-            className={`auth-cube-face auth-cube-face-signin ${view === "signin" ? "is-active" : ""}`}
-          >
-            <div className="auth-cube-face-inner">
-              <span className="auth-wordmark">NEXUS</span>
-              <h2>Welcome back</h2>
-              <form onSubmit={handleLogin}>
-                <input type="email" placeholder="Email" name="email" required />
-                <input type="password" placeholder="Password" name="password" required />
-                <button disabled={loading}>{loading ? "Loading..." : "Sign In"}</button>
-              </form>
-              <div className="auth-links">
-                <button type="button" className="auth-link" onClick={() => goTo("signup")}>
-                  Sign Up
-                </button>
-                <button type="button" className="auth-link" onClick={() => goTo("forgot")}>
-                  Forgot Password
-                </button>
-              </div>
-            </div>
+      <aside className="auth-brand">
+        <div className="auth-brand-grid" />
+        <div className="auth-brand-mark">
+          <Logo size={20} />
+          <span className="auth-brand-wordmark">NEXUS</span>
+        </div>
+        <div className="auth-brand-copy">
+          <h1>Communication. Work. Organized.</h1>
+          <p>Rooms, projects, tasks, scheduling and files for your team — in one fast, focused workspace.</p>
+        </div>
+        <span className="auth-brand-foot">&copy; {new Date().getFullYear()} Snipes Systems</span>
+      </aside>
+
+      <div className="auth-form-panel">
+        <div className="auth-form-stage">
+          <div className="auth-mark-mobile">
+            <Logo size={18} />
+            <span>NEXUS</span>
           </div>
 
-          <div
-            className={`auth-cube-face auth-cube-face-signup ${view === "signup" ? "is-active" : ""}`}
-          >
-            <div className="auth-cube-face-inner">
-              <span className="auth-wordmark">NEXUS</span>
-              <h2>Create your account</h2>
-              <form onSubmit={handleRegister}>
-                <label htmlFor="file" className="auth-avatar-label">
-                  <img src={avatar.url || "./avatar.png"} alt="" />
-                  Upload an image (optional)
-                </label>
-                <input type="file" id="file" style={{ display: "none" }} onChange={handleAvatar} />
-                <input type="text" placeholder="Username" name="username" required />
-                <input type="email" placeholder="Email" name="email" required />
+          <div className="auth-form-header">
+            <h2>{title}</h2>
+            <p>{subtitle}</p>
+          </div>
+
+          {view === "signin" && (
+            <form className="auth-form" onSubmit={handleLogin}>
+              <div className="auth-field">
+                <label htmlFor="signin-email">Email</label>
+                <input id="signin-email" type="email" placeholder="you@company.com" name="email" required />
+              </div>
+              <div className="auth-field">
+                <label htmlFor="signin-password">Password</label>
+                <input id="signin-password" type="password" placeholder="••••••••" name="password" required />
+              </div>
+              <button className="auth-submit" disabled={loading}>{loading ? "Signing in…" : "Sign in"}</button>
+              <div className="auth-links">
+                <button type="button" className="auth-link" onClick={() => goTo("forgot")}>
+                  Forgot password?
+                </button>
+                <button type="button" className="auth-link auth-link-primary" onClick={() => goTo("signup")}>
+                  Create account
+                </button>
+              </div>
+            </form>
+          )}
+
+          {view === "signup" && (
+            <form className="auth-form" onSubmit={handleRegister}>
+              <label htmlFor="file" className="auth-avatar-label">
+                <img src={avatar.url || "./avatar.png"} alt="" />
+                Upload an avatar (optional)
+              </label>
+              <input type="file" id="file" style={{ display: "none" }} onChange={handleAvatar} accept="image/*" />
+              <div className="auth-field">
+                <label htmlFor="signup-username">Username</label>
+                <input id="signup-username" type="text" placeholder="jane.doe" name="username" required />
+              </div>
+              <div className="auth-field">
+                <label htmlFor="signup-email">Email</label>
+                <input id="signup-email" type="email" placeholder="you@company.com" name="email" required />
+              </div>
+              <div className="auth-field">
+                <label htmlFor="signup-password">Password</label>
                 <input
+                  id="signup-password"
                   type="password"
-                  placeholder="Password"
+                  placeholder="••••••••"
                   name="password"
                   required
                   minLength={8}
                   pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}"
                   title="At least 8 characters, with an uppercase letter, a lowercase letter, a number, and a symbol."
                 />
-                <button disabled={loading}>{loading ? "Loading..." : "Sign Up"}</button>
-              </form>
+                <span className="auth-hint">8+ characters with uppercase, lowercase, a number, and a symbol.</span>
+              </div>
+              <button className="auth-submit" disabled={loading}>{loading ? "Creating account…" : "Create account"}</button>
               <div className="auth-links">
                 <button type="button" className="auth-link" onClick={() => goTo("signin")}>
-                  Already have an account? Sign In
+                  Already have an account? <span className="auth-link-primary">Sign in</span>
                 </button>
               </div>
-            </div>
-          </div>
+            </form>
+          )}
 
-          <div
-            className={`auth-cube-face auth-cube-face-forgot ${view === "forgot" ? "is-active" : ""}`}
-          >
-            <div className="auth-cube-face-inner">
-              <span className="auth-wordmark">NEXUS</span>
-              <h2>Reset password</h2>
-              <form onSubmit={handleForgotPassword}>
-                <input type="email" placeholder="Email" name="email" required />
-                <button disabled={loading}>{loading ? "Sending..." : "Send Reset Link"}</button>
-              </form>
+          {view === "forgot" && (
+            <form className="auth-form" onSubmit={handleForgotPassword}>
+              <div className="auth-field">
+                <label htmlFor="forgot-email">Email</label>
+                <input id="forgot-email" type="email" placeholder="you@company.com" name="email" required />
+              </div>
+              <button className="auth-submit" disabled={loading}>{loading ? "Sending…" : "Send reset link"}</button>
               <div className="auth-links">
                 <button type="button" className="auth-link" onClick={() => goTo("signin")}>
-                  Back to Sign In
+                  Back to sign in
                 </button>
               </div>
-            </div>
-          </div>
+            </form>
+          )}
         </div>
       </div>
     </div>

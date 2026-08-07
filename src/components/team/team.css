@@ -10,18 +10,28 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 9px 12px;
   border: 1px solid var(--nx-border);
-  border-radius: var(--nx-radius-sm);
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-surface-1);
+  transition: border-color var(--nx-duration-fast) var(--nx-ease);
+}
+
+.team-row:hover {
+  border-color: var(--nx-border-strong);
 }
 
 .team-row-name {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  font-size: 13px;
+  font-size: var(--nx-text-sm);
+  font-weight: 600;
 }
 
 .team-row-name span {
-  font-size: 12px;
+  font-size: var(--nx-text-xs);
+  font-weight: 400;
+  color: var(--nx-text-secondary);
 }

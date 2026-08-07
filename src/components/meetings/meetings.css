@@ -18,9 +18,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
+  padding: 11px 14px;
   border: 1px solid var(--nx-border);
-  border-radius: var(--nx-radius-sm);
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-surface-1);
+  transition: border-color var(--nx-duration-fast) var(--nx-ease);
+}
+
+.meeting-card:hover {
+  border-color: var(--nx-border-strong);
+}
+
+.meeting-card.is-live {
+  border-color: var(--nx-danger);
 }
 
 .meeting-meta {
