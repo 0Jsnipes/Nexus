@@ -1,0 +1,31 @@
+@import "../../styles/workspace.css";
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notif-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius-sm);
+  background: var(--nx-bg);
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.notif-item.is-unread {
+  border-left: 3px solid var(--nx-accent);
+  background: var(--nx-bg-subtle);
+}
+
+.notif-item p {
+  font-size: 12px;
+  margin-top: 2px;
+}

@@ -1,0 +1,85 @@
+@import "../../styles/workspace.css";
+@import "../tasks/tasks.css";
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.project-card {
+  text-align: left;
+  background: var(--nx-bg);
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius-md);
+  padding: 14px;
+  cursor: pointer;
+}
+
+.project-card:hover {
+  border-color: var(--nx-accent);
+}
+
+.project-card h3 {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.project-card-desc {
+  font-size: 12px;
+  margin: 6px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.project-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.project-progress-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--nx-bg-muted);
+  overflow: hidden;
+}
+
+.project-progress-bar div {
+  height: 100%;
+  background: var(--nx-accent);
+}
+
+.project-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--nx-border);
+  margin-bottom: 16px;
+}
+
+.project-tab {
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nx-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.project-tab.is-active {
+  color: var(--nx-text);
+  border-bottom-color: var(--nx-accent);
+}
+
+.project-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}

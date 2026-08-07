@@ -1,136 +1,74 @@
 import { useEffect, useState } from "react";
-import Chat from "./components/chat/Chat";
-import Detail from "./components/detail/Detail";
-import List from "./components/list/List";
-import Login from "./components/login/Login";
+import Home from "./components/home/Home";
+import Auth from "./components/auth/Auth";
+import Onboarding from "./components/onboarding/Onboarding";
+import AppShell from "./components/shell/AppShell";
 import Notification from "./components/notifications/Notification";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./components/lib/firebase";
-import { useUserStore } from "./components/lib/userStore";
-import { useChatStore } from "./components/lib/chatStore";
+import { NavProvider } from "./lib/NavContext";
+import { useAuthStore } from "./lib/authStore";
+import { useWorkspaceStore } from "./lib/workspaceStore";
+import { applyTheme, getStoredTheme } from "./lib/theme";
 
-const MOBILE_BREAKPOINT = 900;
-
-const getIsMobile = () =>
+// Installed PWA launches carry ?src=pwa (see public/manifest.json start_url)
+// so returning users skip the marketing homepage and land straight on sign-in.
+const isPwaLaunch = () =>
   typeof window !== "undefined" &&
-  window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`).matches;
+  new URLSearchParams(window.location.search).get("src") === "pwa";
 
 const App = () => {
-  const { currentUser, isLoading, fetchUserInfo } = useUserStore();
-  const { chatId } = useChatStore();
-  const [isMobile, setIsMobile] = useState(getIsMobile);
-  const [mobileView, setMobileView] = useState("list");
+  const [showHome, setShowHome] = useState(() => !isPwaLaunch());
+  const session = useAuthStore((s) => s.session);
+  const authLoading = useAuthStore((s) => s.isLoading);
+  const initAuth = useAuthStore((s) => s.init);
+  const memberships = useWorkspaceStore((s) => s.memberships);
+  const workspaceLoading = useWorkspaceStore((s) => s.isLoading);
+  const fetchMemberships = useWorkspaceStore((s) => s.fetchMemberships);
 
   useEffect(() => {
-    const unSub = onAuthStateChanged(auth, (user) => {
-      fetchUserInfo(user?.uid);
-    });
-
-    return () => {
-      unSub();
-    };
-  }, [fetchUserInfo]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia(
-      `(max-width: ${MOBILE_BREAKPOINT}px)`
-    );
-
-    const handleViewportChange = (event) => {
-      setIsMobile(event.matches);
-    };
-
-    setIsMobile(mediaQuery.matches);
-
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener("change", handleViewportChange);
-    } else {
-      mediaQuery.addListener(handleViewportChange);
-    }
-
-    return () => {
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener("change", handleViewportChange);
-      } else {
-        mediaQuery.removeListener(handleViewportChange);
-      }
-    };
+    applyTheme(getStoredTheme());
+    initAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (!currentUser) {
-      setMobileView("list");
-      return;
-    }
+    if (session) fetchMemberships();
+  }, [session, fetchMemberships]);
 
-    if (!isMobile) {
-      setMobileView("chat");
-      return;
-    }
+  if (authLoading) return <div className="loading">Loading...</div>;
 
-    if (!chatId) {
-      setMobileView("list");
-      return;
-    }
-
-    setMobileView((prevView) => (prevView === "detail" ? "detail" : "chat"));
-  }, [currentUser, isMobile, chatId]);
-
-  if (isLoading) return <div className="loading">Loading...</div>;
-
-  const openListView = () => {
-    setMobileView("list");
-  };
-
-  const openChatView = () => {
-    if (chatId) {
-      setMobileView("chat");
-    }
-  };
-
-  const openDetailView = () => {
-    if (chatId) {
-      setMobileView("detail");
-    }
-  };
-
-  let content = <Login />;
-
-  if (currentUser) {
-    if (isMobile) {
-      if (mobileView === "detail" && chatId) {
-        content = <Detail isMobile onBack={openChatView} />;
-      } else if (chatId && mobileView === "chat") {
-        content = (
-          <Chat
-            isMobile
-            onBack={openListView}
-            onOpenDetail={openDetailView}
-          />
-        );
-      } else {
-        content = <List onChatSelect={openChatView} />;
-      }
-    } else {
-      content = (
+  if (!session) {
+    if (showHome) {
+      return (
         <>
-          <List />
-          {chatId && <Chat onOpenDetail={openDetailView} />}
-          {chatId && <Detail />}
+          <Home onEnter={() => setShowHome(false)} />
+          <Notification />
         </>
       );
     }
+    return (
+      <>
+        <Auth />
+        <Notification />
+      </>
+    );
+  }
+
+  if (workspaceLoading) return <div className="loading">Loading...</div>;
+
+  if (memberships.length === 0) {
+    return (
+      <>
+        <Onboarding />
+        <Notification />
+      </>
+    );
   }
 
   return (
-    <div
-      className={`container ${currentUser ? "app-shell" : "auth-shell"} ${
-        isMobile ? "mobile-shell" : "desktop-shell"
-      }`}
-    >
-      {content}
+    <NavProvider>
+      <AppShell />
       <Notification />
-    </div>
+    </NavProvider>
   );
 };
 

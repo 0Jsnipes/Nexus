@@ -1,0 +1,44 @@
+@import "../../styles/workspace.css";
+
+.dashboard-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.dashboard-card {
+  padding: 14px;
+}
+
+.dashboard-card h3 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.dashboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dashboard-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 6px 4px;
+  border-radius: var(--nx-radius-sm);
+  cursor: pointer;
+}
+
+.dashboard-list li:hover {
+  background: var(--nx-bg-subtle);
+}

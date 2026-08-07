@@ -1,0 +1,48 @@
+@import "../../styles/workspace.css";
+@import "../rooms/rooms.css";
+
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.file-card {
+  display: block;
+  border: 1px solid var(--nx-border);
+  border-radius: var(--nx-radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--nx-text);
+  background: var(--nx-bg);
+}
+
+.file-card img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  display: block;
+}
+
+.file-card-icon {
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--nx-bg-subtle);
+  color: var(--nx-text-faint);
+}
+
+.file-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-card-meta {
+  font-size: 11px;
+  padding: 2px 8px 8px;
+}
