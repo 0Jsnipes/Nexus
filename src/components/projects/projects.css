@@ -67,6 +67,9 @@
 }
 
 .project-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 10px;
   border: none;
   background: none;
@@ -74,10 +77,29 @@
   font-weight: 500;
   color: var(--nx-text-secondary);
   cursor: pointer;
+  white-space: nowrap;
   border-bottom: 2px solid transparent;
   position: relative;
   top: 1px;
   transition: color var(--nx-duration-fast) var(--nx-ease);
+}
+
+.project-tab-icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .project-tabs {
+    justify-content: space-between;
+  }
+  .project-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 4px;
+  }
+  .project-tab-label {
+    display: none;
+  }
 }
 
 .project-tab:hover {

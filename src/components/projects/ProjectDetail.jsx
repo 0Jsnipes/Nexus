@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiArrowLeft, FiPlus } from "react-icons/fi";
+import { FiArrowLeft, FiPlus, FiEye, FiCheckSquare, FiColumns, FiFlag, FiFolder, FiActivity } from "react-icons/fi";
 import { supabase } from "../../lib/supabase";
 import { useWorkspaceMembers } from "../../lib/useWorkspaceMembers";
 import { useTasks } from "../tasks/useTasks";
@@ -9,6 +9,14 @@ import TaskModal from "../tasks/TaskModal";
 import EmptyState from "../shared/EmptyState";
 
 const TABS = ["Overview", "Tasks", "Board", "Milestones", "Files", "Activity"];
+const TAB_ICONS = {
+  Overview: FiEye,
+  Tasks: FiCheckSquare,
+  Board: FiColumns,
+  Milestones: FiFlag,
+  Files: FiFolder,
+  Activity: FiActivity,
+};
 
 const ProjectDetail = ({ workspaceId, projectId, project, onBack, onProjectChanged }) => {
   const [tab, setTab] = useState("Overview");
@@ -76,9 +84,22 @@ const ProjectDetail = ({ workspaceId, projectId, project, onBack, onProjectChang
       </div>
 
       <div className="project-tabs">
-        {TABS.map((t) => (
-          <button type="button" key={t} className={`project-tab ${tab === t ? "is-active" : ""}`} onClick={() => setTab(t)}>{t}</button>
-        ))}
+        {TABS.map((t) => {
+          const Icon = TAB_ICONS[t];
+          return (
+            <button
+              type="button"
+              key={t}
+              className={`project-tab ${tab === t ? "is-active" : ""}`}
+              onClick={() => setTab(t)}
+              title={t}
+              aria-label={t}
+            >
+              <Icon size={14} className="project-tab-icon" />
+              <span className="project-tab-label">{t}</span>
+            </button>
+          );
+        })}
       </div>
 
       {tab === "Overview" && (

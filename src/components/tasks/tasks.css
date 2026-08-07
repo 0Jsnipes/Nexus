@@ -21,9 +21,22 @@
   scroll-snap-align: start;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
+  /* Side-scrolling columns don't work well on a phone — stack them full
+     width instead and let the page scroll vertically. */
+  .task-board {
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: visible;
+    height: auto;
+    scroll-snap-type: none;
+  }
   .task-board-col {
-    width: 84vw;
+    width: 100%;
+    max-height: none;
+  }
+  .task-board-col-body {
+    overflow-y: visible;
   }
 }
 
