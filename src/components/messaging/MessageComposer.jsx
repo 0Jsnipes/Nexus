@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { toast } from "react-toastify";
 import EmojiPicker from "emoji-picker-react";
 import { FiPaperclip, FiSmile, FiX, FiSend } from "react-icons/fi";
 import { uploadFile } from "../../lib/storage";
@@ -30,6 +31,8 @@ const MessageComposer = ({ workspaceId, disabled, placeholder, replyTo, onCancel
       setText("");
       setPendingFile(null);
       onCancelReply?.();
+    } catch (err) {
+      toast.error(err.message || "Couldn't send that message.");
     } finally {
       setSending(false);
     }
