@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "./dm.css";
 import { supabase } from "../../lib/supabase";
+import { createDirectMessage } from "../../lib/channels";
 import { useAuthStore } from "../../lib/authStore";
 import { useWorkspaceStore, selectActiveMembership } from "../../lib/workspaceStore";
 import { useMessages } from "../messaging/useMessages";
@@ -69,15 +70,14 @@ const DirectMessages = ({ route, navigate }) => {
       }
     }
 
-    const { data: conv, error } = await supabase
-      .from("dm_conversations")
-      .insert({ workspace_id: active.workspace_id, is_group: allIds.length > 2, name: groupName || null, created_by: profile.id })
-      .select()
-      .single();
+    const { data: conv, error } = await createDirectMessage({
+      workspaceId: active.workspace_id,
+      userIds: allIds,
+      name: groupName || null,
+    });
 
     if (error) return toast.error(error.message);
 
-    await supabase.from("dm_members").insert(allIds.map((user_id) => ({ dm_id: conv.id, user_id })));
     await fetchConversations();
     navigate("dms", { dmId: conv.id });
   };

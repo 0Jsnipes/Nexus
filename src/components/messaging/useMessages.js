@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../lib/authStore";
 import { notifyNewMessage } from "../../lib/notify";
+import { resolveStorageUrl } from "../../lib/storage";
 
 // Shared message subsystem for both Rooms and Direct Messages.
 // Pass exactly one of { roomId } or { dmId }.
@@ -31,7 +32,18 @@ export const useMessages = ({ workspaceId, roomId, dmId, roomName, isPrivateRoom
       console.error("Failed to load messages", err);
       setError(err.message);
     } else {
-      setMessages(data || []);
+      const resolved = await Promise.all(
+        (data || []).map(async (message) => ({
+          ...message,
+          attachments: await Promise.all(
+            (message.attachments || []).map(async (attachment) => ({
+              ...attachment,
+              url: await resolveStorageUrl(attachment.url),
+            }))
+          ),
+        }))
+      );
+      setMessages(resolved);
     }
     setLoading(false);
   }, [roomId, dmId, channelKey]);
@@ -100,6 +112,7 @@ export const useMessages = ({ workspaceId, roomId, dmId, roomName, isPrivateRoom
       await fetchMessages();
 
       notifyNewMessage({
+        messageId: data.id,
         workspaceId,
         body,
         senderId: profile.id,

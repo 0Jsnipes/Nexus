@@ -4,6 +4,7 @@ import { supabase } from "../../lib/supabase";
 import { useWorkspaceStore, selectActiveMembership } from "../../lib/workspaceStore";
 import EmptyState from "../shared/EmptyState";
 import { FiFile, FiImage, FiSearch, FiGrid, FiList } from "react-icons/fi";
+import { resolveStorageUrl } from "../../lib/storage";
 
 const Files = () => {
   const [files, setFiles] = useState([]);
@@ -21,8 +22,11 @@ const Files = () => {
       .select("*, uploader:profiles(username)")
       .eq("workspace_id", active.workspace_id)
       .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setFiles(data || []);
+      .then(async ({ data }) => {
+        const resolved = await Promise.all(
+          (data || []).map(async (file) => ({ ...file, url: await resolveStorageUrl(file.url) }))
+        );
+        setFiles(resolved);
         setLoading(false);
       });
   }, [active]);

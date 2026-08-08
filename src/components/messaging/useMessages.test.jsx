@@ -22,6 +22,7 @@ vi.mock('../../lib/authStore', () => ({
 }))
 
 vi.mock('../../lib/notify', () => ({ notifyNewMessage: mocks.notifyNewMessage }))
+vi.mock('../../lib/storage', () => ({ resolveStorageUrl: (value) => Promise.resolve(value) }))
 
 const SELECT_COLUMNS =
   '*, sender:profiles!messages_sender_id_fkey(id, username, avatar_url), attachments:message_attachments(*), reactions:message_reactions(*)'
@@ -78,7 +79,7 @@ describe('useMessages', () => {
     expect(select).toHaveBeenCalledWith(SELECT_COLUMNS)
     const query = select.mock.results[0].value
     expect(query.eq).toHaveBeenCalledWith('room_id', 'room-1')
-    expect(result.current.messages).toEqual([message])
+    expect(result.current.messages).toEqual([{ ...message, attachments: [] }])
     expect(result.current.error).toBeNull()
   })
 
@@ -126,9 +127,9 @@ describe('useMessages', () => {
       reply_to_id: null,
     })
     expect(select).toHaveBeenCalledTimes(2)
-    expect(result.current.messages).toEqual([inserted])
+    expect(result.current.messages).toEqual([{ ...inserted, attachments: [] }])
     expect(mocks.notifyNewMessage).toHaveBeenCalledWith(
-      expect.objectContaining({ roomId: 'room-1', senderId: 'user-1', body: 'Sent message' })
+      expect.objectContaining({ messageId: 'message-2', roomId: 'room-1', senderId: 'user-1', body: 'Sent message' })
     )
   })
 })

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "./rooms.css";
 import { supabase } from "../../lib/supabase";
+import { createRoom } from "../../lib/channels";
 import { useAuthStore } from "../../lib/authStore";
 import { useWorkspaceStore, selectActiveMembership } from "../../lib/workspaceStore";
 import { useMessages } from "../messaging/useMessages";
@@ -183,27 +184,17 @@ const CreateRoomModal = ({ workspaceId, onClose, onCreated }) => {
       return toast.warn("Room name is required.");
     }
 
-    const { data: sessionData } = await supabase.auth.getSession();
-    const { data, error } = await supabase
-      .from("rooms")
-      .insert({
-        workspace_id: workspaceId,
-        name: name.trim(),
-        topic: topic?.trim() || null,
-        is_private: isPrivate === "on",
-        created_by: sessionData.session.user.id,
-      })
-      .select()
-      .single();
+    const { data, error } = await createRoom({
+      workspaceId,
+      name: name.trim(),
+      topic: topic?.trim() || null,
+      isPrivate: isPrivate === "on",
+    });
 
     if (error) {
       toast.error(error.message);
       setLoading(false);
       return;
-    }
-
-    if (data.is_private) {
-      await supabase.from("room_members").insert({ room_id: data.id, user_id: sessionData.session.user.id });
     }
 
     toast.success(`#${data.name} created.`);

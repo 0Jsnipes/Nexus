@@ -7,6 +7,7 @@ import TaskBoard from "../tasks/TaskBoard";
 import TaskList from "../tasks/TaskList";
 import TaskModal from "../tasks/TaskModal";
 import EmptyState from "../shared/EmptyState";
+import { resolveStorageUrl } from "../../lib/storage";
 
 const TABS = ["Overview", "Tasks", "Board", "Milestones", "Files", "Activity"];
 const TAB_ICONS = {
@@ -32,7 +33,17 @@ const ProjectDetail = ({ workspaceId, projectId, project, onBack, onProjectChang
       supabase.from("milestones").select("*").eq("project_id", projectId).order("due_date").then(({ data }) => setMilestones(data || []));
     }
     if (tab === "Files") {
-      supabase.from("files").select("*").eq("project_id", projectId).order("created_at", { ascending: false }).then(({ data }) => setFiles(data || []));
+      supabase
+        .from("files")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false })
+        .then(async ({ data }) => {
+          const resolved = await Promise.all(
+            (data || []).map(async (file) => ({ ...file, url: await resolveStorageUrl(file.url) }))
+          );
+          setFiles(resolved);
+        });
     }
     if (tab === "Activity") {
       supabase

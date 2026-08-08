@@ -21,7 +21,7 @@ const messageRecipientIds = async ({ workspaceId, roomId, dmId, isPrivateRoom, s
 
 const truncate = (text, max = 80) => (text && text.length > max ? `${text.slice(0, max - 1)}…` : text);
 
-export const notifyNewMessage = async ({ workspaceId, body, senderId, senderName, roomId, dmId, roomName, isPrivateRoom }) => {
+export const notifyNewMessage = async ({ messageId, workspaceId, body, senderId, senderName, roomId, dmId, roomName, isPrivateRoom }) => {
   if (!body) return;
 
   const recipientIds = await messageRecipientIds({ workspaceId, roomId, dmId, isPrivateRoom, senderId });
@@ -55,12 +55,7 @@ export const notifyNewMessage = async ({ workspaceId, body, senderId, senderName
   // Silently no-ops until the send-push edge function is deployed.
   supabase.functions
     .invoke("send-push", {
-      body: {
-        userIds: recipientIds,
-        title: `${senderName} in ${context}`,
-        body: truncate(body),
-        url: "/?src=pwa",
-      },
+      body: { messageId },
     })
     .catch(() => {});
 };
