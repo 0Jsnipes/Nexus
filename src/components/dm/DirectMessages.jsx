@@ -33,7 +33,7 @@ const DirectMessages = ({ route, navigate }) => {
   const activeConversation = conversations.find((c) => c.id === dmId);
 
   const fetchConversations = async () => {
-    if (!profile) return;
+    if (!profile || !active?.workspace_id) return;
     setLoading(true);
     const { data, error } = await supabase
       .from("dm_conversations")
@@ -42,7 +42,7 @@ const DirectMessages = ({ route, navigate }) => {
       .order("updated_at", { ascending: false });
 
     if (error) toast.error(error.message);
-    else setConversations((data || []).filter((c) => c.members.some((m) => m.user_id === profile.id)));
+    else setConversations((data || []).filter((c) => c.members?.some((m) => m.user_id === profile.id)));
     setLoading(false);
   };
 
@@ -57,12 +57,12 @@ const DirectMessages = ({ route, navigate }) => {
   }, [newDmWith, active?.workspace_id]);
 
   const startConversation = async (userIds, groupName) => {
-    if (!profile) return;
+    if (!profile || !active?.workspace_id) return;
     const allIds = Array.from(new Set([profile.id, ...userIds]));
 
     if (allIds.length === 2) {
       const existing = conversations.find(
-        (c) => !c.is_group && c.members.length === 2 && c.members.every((m) => allIds.includes(m.user_id))
+        (c) => !c.is_group && c.members?.length === 2 && c.members.every((m) => allIds.includes(m.user_id))
       );
       if (existing) {
         navigate("dms", { dmId: existing.id });
@@ -186,19 +186,38 @@ const DirectMessages = ({ route, navigate }) => {
 const NewDmModal = ({ workspaceId, currentUserId, onClose, onStart }) => {
   const [query, setQuery] = useState("");
   const [members, setMembers] = useState([]);
+  const [loadingMembers, setLoadingMembers] = useState(true);
   const [selected, setSelected] = useState([]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const run = async () => {
-      const { data } = await supabase
+      setLoadingMembers(true);
+      const { data, error } = await supabase
         .from("workspace_members")
-        .select("user_id, profile:profiles(id, username, avatar_url)")
+        .select("user_id, profile:profiles!workspace_members_user_id_fkey(id, username, avatar_url)")
         .eq("workspace_id", workspaceId)
         .eq("status", "active")
         .neq("user_id", currentUserId);
-      setMembers(data || []);
+
+      if (cancelled) return;
+
+      if (error) {
+        console.error("Failed to load DM recipients", error);
+        toast.error("Could not load workspace members.");
+        setMembers([]);
+      } else {
+        setMembers(data || []);
+      }
+      setLoadingMembers(false);
     };
-    run();
+
+    if (workspaceId && currentUserId) run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [workspaceId, currentUserId]);
 
   const filtered = members.filter((m) => m.profile?.username?.toLowerCase().includes(query.toLowerCase()));
@@ -213,7 +232,8 @@ const NewDmModal = ({ workspaceId, currentUserId, onClose, onStart }) => {
         style={{ marginBottom: 10 }}
       />
       <div className="dm-member-picker nx-scroll">
-        {filtered.map((m) => (
+        {loadingMembers && <div className="nx-skeleton" style={{ height: 42, marginBottom: 6 }} />}
+        {!loadingMembers && filtered.map((m) => (
           <label className="dm-member-row" key={m.user_id}>
             <input
               type="checkbox"
@@ -226,7 +246,7 @@ const NewDmModal = ({ workspaceId, currentUserId, onClose, onStart }) => {
             <span>{m.profile?.username}</span>
           </label>
         ))}
-        {filtered.length === 0 && <p className="nx-muted" style={{ fontSize: 12 }}>No matches.</p>}
+        {!loadingMembers && filtered.length === 0 && <p className="nx-muted" style={{ fontSize: 12 }}>No matches.</p>}
       </div>
       <div className="nx-modal-actions">
         <button type="button" className="nx-btn" onClick={onClose}>Cancel</button>
