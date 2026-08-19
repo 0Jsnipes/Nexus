@@ -16,17 +16,7 @@
       content="Nexus by Snipes Systems — communication, work, and organization in one place."
     />
     <title>Nexus | by Snipes Systems</title>
-    <script>
-      (function () {
-        try {
-          var theme = localStorage.getItem("nexus:theme") || "system";
-          if (theme === "system") {
-            theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-          }
-          document.documentElement.setAttribute("data-theme", theme);
-        } catch (e) {}
-      })();
-    </script>
+    <script src="/theme-bootstrap.js"></script>
   </head>
   <body>
     <div id="root"></div>
