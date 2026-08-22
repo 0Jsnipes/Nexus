@@ -36,7 +36,7 @@ describe('MessageList', () => {
       reactions: [],
     }
 
-    render(
+    const { container } = render(
       <MessageList
         messages={[message]}
         currentUserId="user-1"
@@ -51,5 +51,17 @@ describe('MessageList', () => {
     expect(onReply).toHaveBeenCalledWith(message)
     expect(screen.getByTitle('Edit')).toBeInTheDocument()
     expect(screen.getByTitle('Delete')).toBeInTheDocument()
+    expect(container.querySelector('.msg-row')).toHaveClass('is-mine')
+  })
+
+  it('keeps messages from teammates on the left', () => {
+    const { container } = render(
+      <MessageList
+        messages={[{ id: 'message-2', sender_id: 'user-2', body: 'Left side', created_at: new Date().toISOString(), sender: { username: 'Angela' }, attachments: [], reactions: [] }]}
+        currentUserId="user-1"
+        {...handlers}
+      />
+    )
+    expect(container.querySelector('.msg-row')).not.toHaveClass('is-mine')
   })
 })

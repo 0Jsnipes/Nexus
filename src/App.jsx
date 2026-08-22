@@ -27,6 +27,7 @@ const App = () => {
   const [legalPage, setLegalPage] = useState(getLegalPage);
   const session = useAuthStore((s) => s.session);
   const authLoading = useAuthStore((s) => s.isLoading);
+  const isPasswordRecovery = useAuthStore((s) => s.isPasswordRecovery);
   const initAuth = useAuthStore((s) => s.init);
   const memberships = useWorkspaceStore((s) => s.memberships);
   const workspaceLoading = useWorkspaceStore((s) => s.isLoading);
@@ -60,6 +61,15 @@ const App = () => {
   }
 
   if (authLoading) return <div className="loading">Loading...</div>;
+
+  if (isPasswordRecovery) {
+    return (
+      <>
+        <Auth initialView="recovery" />
+        <Notification />
+      </>
+    );
+  }
 
   if (!session) {
     if (showHome) {

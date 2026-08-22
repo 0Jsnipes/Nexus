@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../lib/authStore";
-import { notifyTaskAssigned } from "../../lib/notify";
+import { notifyTaskAssigned, notifyTaskCompleted } from "../../lib/notify";
 
 const TASK_SELECT = "*, assignee:profiles!tasks_assignee_id_fkey(id, username, avatar_url), project:projects(id, name)";
 
-export const useTasks = ({ workspaceId, projectId, assigneeId, mineOnly, currentUserId }) => {
+export const useTasks = ({ workspaceId, projectId, assigneeId, mineOnly, includeOwnedOrCollaborating, currentUserId }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const profile = useAuthStore((s) => s.profile);
@@ -17,11 +17,21 @@ export const useTasks = ({ workspaceId, projectId, assigneeId, mineOnly, current
     if (projectId) query = query.eq("project_id", projectId);
     if (assigneeId) query = query.eq("assignee_id", assigneeId);
     if (mineOnly && currentUserId) query = query.eq("assignee_id", currentUserId);
+    if (includeOwnedOrCollaborating && currentUserId) {
+      const { data: collaborations } = await supabase
+        .from("task_collaborators")
+        .select("task_id")
+        .eq("user_id", currentUserId);
+      const taskIds = (collaborations || []).map((row) => row.task_id);
+      const filters = [`assignee_id.eq.${currentUserId}`, `created_by.eq.${currentUserId}`];
+      if (taskIds.length) filters.push(`id.in.(${taskIds.join(",")})`);
+      query = query.or(filters.join(","));
+    }
 
     const { data, error } = await query;
     if (!error) setTasks(data || []);
     setLoading(false);
-  }, [workspaceId, projectId, assigneeId, mineOnly, currentUserId]);
+  }, [workspaceId, projectId, assigneeId, mineOnly, includeOwnedOrCollaborating, currentUserId]);
 
   useEffect(() => {
     fetchTasks();
@@ -62,6 +72,14 @@ export const useTasks = ({ workspaceId, projectId, assigneeId, mineOnly, current
       if (error) throw error;
       if (patch.assignee_id && patch.assignee_id !== previous?.assignee_id) {
         notifyTaskAssigned({ workspaceId, task: { ...previous, ...patch }, assigneeId: patch.assignee_id, actorName: profile?.username });
+      }
+      if (patch.status === "complete" && previous?.status !== "complete") {
+        notifyTaskCompleted({
+          workspaceId,
+          task: { ...previous, ...patch },
+          actorId: profile?.id,
+          actorName: profile?.username,
+        });
       }
       fetchTasks();
     },

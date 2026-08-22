@@ -33,17 +33,18 @@ describe('secure storage routing', () => {
 
     await expect(uploadFile('profile/user-1', file)).resolves.toBe('https://cdn.example/avatar.png')
     expect(mocks.from).toHaveBeenCalledWith('nexus-public')
-    expect(mocks.upload).toHaveBeenCalledWith('profile/user-1/1234-avatar.png', file, {
+    expect(mocks.upload).toHaveBeenCalledWith(expect.stringMatching(/^profile\/user-1\/1234-[0-9a-f-]+-avatar\.png$/), file, {
       cacheControl: '3600',
       upsert: false,
+      contentType: 'image/png',
     })
   })
 
   it('stores workspace files privately and persists only their object key', async () => {
     const file = new File(['secret'], 'plan.pdf', { type: 'application/pdf' })
 
-    await expect(uploadFile('workspace-1/attachments', file)).resolves.toBe(
-      'workspace-1/attachments/1234-plan.pdf'
+    await expect(uploadFile('workspace-1/attachments', file)).resolves.toMatch(
+      /^workspace-1\/attachments\/1234-[0-9a-f-]+-plan\.pdf$/
     )
     expect(mocks.from).toHaveBeenCalledWith('nexus')
     expect(mocks.getPublicUrl).not.toHaveBeenCalled()

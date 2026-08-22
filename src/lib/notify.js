@@ -19,11 +19,30 @@ const messageRecipientIds = async ({ workspaceId, roomId, dmId, isPrivateRoom, s
   return (data || []).map((r) => r.user_id).filter((id) => id !== senderId);
 };
 
-const truncate = (text, max = 80) => (text && text.length > max ? `${text.slice(0, max - 1)}…` : text);
+const truncate = (text, max = 80) => {
+  const value = text?.trim() || "Sent an attachment";
+  return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+};
+
+const activeWorkspaceUserIds = async (workspaceId, excludeUserId) => {
+  const { data, error } = await supabase
+    .from("workspace_members")
+    .select("user_id")
+    .eq("workspace_id", workspaceId)
+    .eq("status", "active");
+  if (error) throw error;
+  return (data || []).map((row) => row.user_id).filter((id) => id !== excludeUserId);
+};
+
+const notifyWorkspace = async ({ workspaceId, excludeUserId, type, title, body, link }) => {
+  const userIds = await activeWorkspaceUserIds(workspaceId, excludeUserId);
+  if (!userIds.length) return;
+  await supabase.from("notifications").insert(
+    userIds.map((userId) => ({ workspace_id: workspaceId, user_id: userId, type, title, body, link }))
+  );
+};
 
 export const notifyNewMessage = async ({ messageId, workspaceId, body, senderId, senderName, roomId, dmId, roomName, isPrivateRoom }) => {
-  if (!body) return;
-
   const recipientIds = await messageRecipientIds({ workspaceId, roomId, dmId, isPrivateRoom, senderId });
   if (!recipientIds.length) return;
 
@@ -69,5 +88,36 @@ export const notifyTaskAssigned = async ({ workspaceId, task, assigneeId, actorN
     title: `${actorName} assigned you a task`,
     body: task.title,
     link: linkTo("projects", task.project_id ? { projectId: task.project_id } : {}),
+  });
+};
+
+export const notifyTaskCompleted = ({ workspaceId, task, actorId, actorName }) =>
+  notifyWorkspace({
+    workspaceId,
+    excludeUserId: actorId,
+    type: "task_completed",
+    title: `${actorName || "A teammate"} completed a task`,
+    body: task.title,
+    link: linkTo(task.project_id ? "projects" : "tasks", task.project_id ? { projectId: task.project_id } : {}),
+  });
+
+export const notifyMeetingScheduled = ({ workspaceId, meeting, actorId, actorName }) =>
+  notifyWorkspace({
+    workspaceId,
+    excludeUserId: actorId,
+    type: "meeting_scheduled",
+    title: `${actorName || "A teammate"} scheduled a meeting`,
+    body: `${meeting.title} · ${new Date(meeting.starts_at).toLocaleString()}`,
+    link: linkTo("meetings", {}),
+  });
+
+export const notifyHelpRequest = async ({ workspaceId, task, helperId, requesterName, requestId }) => {
+  await supabase.from("notifications").insert({
+    workspace_id: workspaceId,
+    user_id: helperId,
+    type: "task_help_requested",
+    title: `${requesterName} asked for your help`,
+    body: task.title,
+    link: linkTo("tasks", { helpRequestId: requestId }),
   });
 };

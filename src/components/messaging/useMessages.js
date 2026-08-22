@@ -91,20 +91,18 @@ export const useMessages = ({ workspaceId, roomId, dmId, roomName, isPrivateRoom
         await supabase.from("message_attachments").insert(
           attachments.map((a) => ({ message_id: data.id, url: a.url, name: a.name, type: a.type, size: a.size }))
         );
-        if (roomId) {
-          await supabase.from("files").insert(
-            attachments.map((a) => ({
-              workspace_id: workspaceId,
-              uploaded_by: profile.id,
-              room_id: roomId,
-              message_id: data.id,
-              name: a.name,
-              url: a.url,
-              type: a.type,
-              size: a.size,
-            }))
-          );
-        }
+        await supabase.from("files").insert(
+          attachments.map((a) => ({
+            workspace_id: workspaceId,
+            uploaded_by: profile.id,
+            room_id: roomId || null,
+            message_id: data.id,
+            name: a.name,
+            url: a.url,
+            type: a.type,
+            size: a.size,
+          }))
+        );
       }
 
       // Re-fetch directly so the sender sees the message even if Realtime is
