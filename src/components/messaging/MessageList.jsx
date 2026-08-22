@@ -64,7 +64,7 @@ const MessageList = ({ messages, error, currentUserId, onReply, onEdit, onDelete
             const reactions = groupReactions(m.reactions);
             const replyTo = messages.find((x) => x.id === m.reply_to_id);
             return (
-              <div className="msg-row" key={m.id}>
+              <div className={`msg-row ${m.sender_id === currentUserId ? "is-mine" : ""}`} key={m.id}>
                 <Avatar src={m.sender?.avatar_url} name={m.sender?.username} size={30} />
                 <div className="msg-body">
                   <div className="msg-meta">

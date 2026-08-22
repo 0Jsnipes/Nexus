@@ -4,6 +4,7 @@ import { supabase } from "./supabase";
 export const useAuthStore = create((set) => ({
   session: null,
   profile: null,
+  isPasswordRecovery: false,
   isLoading: true,
 
   init: async () => {
@@ -16,8 +17,8 @@ export const useAuthStore = create((set) => ({
       set({ session: null, isLoading: false });
     }
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      set({ session });
+    supabase.auth.onAuthStateChange((event, session) => {
+      set({ session, isPasswordRecovery: event === "PASSWORD_RECOVERY" });
       if (session) {
         useAuthStore.getState().fetchProfile();
       } else {
@@ -45,6 +46,8 @@ export const useAuthStore = create((set) => ({
 
   logout: async () => {
     await supabase.auth.signOut();
-    set({ session: null, profile: null });
+    set({ session: null, profile: null, isPasswordRecovery: false });
   },
+
+  finishPasswordRecovery: () => set({ isPasswordRecovery: false }),
 }));

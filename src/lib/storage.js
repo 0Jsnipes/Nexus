@@ -15,7 +15,12 @@ const BLOCKED_EXTENSIONS = /\.(?:html?|xhtml|svg|js|mjs|cjs)$/i;
 const safeFilename = (name = "file") => {
   const cleaned = name
     .normalize("NFKC")
-    .replace(/[\\/\0-\x1F\x7F]+/g, "-")
+    .split("")
+    .map((character) => {
+      const code = character.charCodeAt(0);
+      return code < 32 || code === 127 || character === "/" || character === "\\" ? "-" : character;
+    })
+    .join("")
     .replace(/[^A-Za-z0-9._ -]/g, "-")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")

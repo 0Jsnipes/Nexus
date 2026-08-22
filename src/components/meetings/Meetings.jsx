@@ -3,6 +3,9 @@ import { toast } from "react-toastify";
 import "./meetings.css";
 import { supabase } from "../../lib/supabase";
 import { useWorkspaceStore, selectActiveMembership } from "../../lib/workspaceStore";
+import { useAuthStore } from "../../lib/authStore";
+import { notifyMeetingScheduled } from "../../lib/notify";
+import { createGoogleMeeting, getCalendarConnections } from "../../lib/calendarIntegrations";
 import { useWorkspaceMembers } from "../../lib/useWorkspaceMembers";
 import { getVideoProvider } from "../../lib/video/provider";
 import Modal from "../shared/Modal";
@@ -15,8 +18,10 @@ const Meetings = () => {
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [detail, setDetail] = useState(null);
+  const [googleConnected, setGoogleConnected] = useState(false);
 
   const active = useWorkspaceStore(selectActiveMembership);
+  const profile = useAuthStore((s) => s.profile);
   const can = useWorkspaceStore((s) => s.can);
   const { members } = useWorkspaceMembers(active?.workspace_id);
 
@@ -35,6 +40,7 @@ const Meetings = () => {
 
   useEffect(() => {
     fetchMeetings();
+    getCalendarConnections().then((items) => setGoogleConnected(items.some((item) => item.provider === "google" && item.status === "active"))).catch(() => setGoogleConnected(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.workspace_id]);
 
@@ -69,6 +75,17 @@ const Meetings = () => {
       .select()
       .single();
     if (error) return toast.error(error.message);
+    if (googleConnected) {
+      try {
+        const google = await createGoogleMeeting({ meeting: data });
+        await supabase.from("meetings").update({ provider: "google", meeting_url: google.joinUrl, external_event_id: google.eventId, external_calendar_url: google.calendarUrl }).eq("id", data.id);
+        data.provider = "google";
+        data.meeting_url = google.joinUrl;
+      } catch (googleError) {
+        toast.error(googleError.message);
+      }
+    }
+    notifyMeetingScheduled({ workspaceId: active.workspace_id, meeting: data, actorId: profile?.id, actorName: profile?.username });
     fetchMeetings();
     setDetail(data);
   };
@@ -135,6 +152,7 @@ const Meetings = () => {
         <MeetingModal
           workspaceId={active.workspace_id}
           members={members}
+          googleConnected={googleConnected}
           onClose={() => setShowCreate(false)}
           onSaved={() => {
             setShowCreate(false);
@@ -147,6 +165,7 @@ const Meetings = () => {
         <MeetingModal
           workspaceId={active.workspace_id}
           members={members}
+          googleConnected={googleConnected}
           meeting={detail}
           onClose={() => setDetail(null)}
           onSaved={() => {
@@ -159,7 +178,7 @@ const Meetings = () => {
   );
 };
 
-const MeetingModal = ({ workspaceId, members, meeting, onClose, onSaved }) => {
+const MeetingModal = ({ workspaceId, members, meeting, googleConnected, onClose, onSaved }) => {
   const [loading, setLoading] = useState(false);
   const isEdit = !!meeting;
   const defaultDate = meeting ? new Date(meeting.starts_at).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10);
@@ -168,7 +187,7 @@ const MeetingModal = ({ workspaceId, members, meeting, onClose, onSaved }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const { title, description, date, time, duration, meeting_url, notes, action_items } = Object.fromEntries(new FormData(e.target));
+    const { title, description, date, time, duration, provider, meeting_url, attendee_emails, notes, action_items } = Object.fromEntries(new FormData(e.target));
     if (!title?.trim()) {
       setLoading(false);
       return toast.warn("Meeting title is required.");
@@ -183,14 +202,29 @@ const MeetingModal = ({ workspaceId, members, meeting, onClose, onSaved }) => {
       meeting_url: meeting_url?.trim() || null,
       notes: notes?.trim() || null,
       action_items: action_items?.trim() || null,
+      provider: provider || "external",
     };
 
-    const { error } = isEdit
+    const { data: savedMeeting, error } = isEdit
       ? await supabase.from("meetings").update(payload).eq("id", meeting.id)
-      : await supabase.from("meetings").insert({ ...payload, workspace_id: workspaceId, host_id: sessionData.session.user.id, created_by: sessionData.session.user.id });
+      : await supabase.from("meetings").insert({ ...payload, workspace_id: workspaceId, host_id: sessionData.session.user.id, created_by: sessionData.session.user.id }).select().single();
 
     if (error) toast.error(error.message);
     else {
+      if (!isEdit && savedMeeting && provider === "google") {
+        try {
+          const attendeeEmails = String(attendee_emails || "").split(/[\s,;]+/).map((email) => email.trim()).filter(Boolean);
+          const google = await createGoogleMeeting({ meeting: savedMeeting, attendeeEmails });
+          await supabase.from("meetings").update({ meeting_url: google.joinUrl, external_event_id: google.eventId, external_calendar_url: google.calendarUrl }).eq("id", savedMeeting.id);
+          savedMeeting.meeting_url = google.joinUrl;
+        } catch (googleError) {
+          toast.error(`Meeting saved, but Google sync failed: ${googleError.message}`);
+        }
+      }
+      if (!isEdit && savedMeeting) {
+        const actorName = sessionData.session.user.user_metadata?.username || sessionData.session.user.email;
+        notifyMeetingScheduled({ workspaceId, meeting: savedMeeting, actorId: sessionData.session.user.id, actorName });
+      }
       toast.success(isEdit ? "Meeting updated." : "Meeting scheduled.");
       onSaved();
     }
@@ -223,9 +257,22 @@ const MeetingModal = ({ workspaceId, members, meeting, onClose, onSaved }) => {
           </div>
         </div>
         <div className="nx-field">
-          <label>Meeting link (external)</label>
-          <input className="nx-input" name="meeting_url" placeholder="https://meet.google.com/..." defaultValue={meeting?.meeting_url} />
+          <label>Meeting provider</label>
+          <select className="nx-select" name="provider" defaultValue={meeting?.provider || (googleConnected ? "google" : "external")}>
+            {googleConnected && <option value="google">Google Calendar + Meet</option>}
+            <option value="external">External link (Teams, Zoom, or other)</option>
+          </select>
         </div>
+        <div className="nx-field">
+          <label>External meeting link</label>
+          <input className="nx-input" name="meeting_url" placeholder="https://teams.microsoft.com/..." defaultValue={meeting?.meeting_url} />
+        </div>
+        {googleConnected && !isEdit && (
+          <div className="nx-field">
+            <label>Guest emails (optional)</label>
+            <textarea className="nx-textarea" name="attendee_emails" rows={2} placeholder="person@example.com, teammate@example.com" />
+          </div>
+        )}
         {members?.length > 0 && (
           <p className="nx-hint" style={{ marginBottom: 10 }}>{members.length} workspace members can be invited from Team once attendee tracking UI ships.</p>
         )}

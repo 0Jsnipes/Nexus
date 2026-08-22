@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { FiArrowLeft, FiPlus, FiEye, FiCheckSquare, FiColumns, FiFlag, FiFolder, FiActivity } from "react-icons/fi";
+import { toast } from "react-toastify";
+import { FiArrowLeft, FiPlus, FiEye, FiCheckSquare, FiColumns, FiFlag, FiFolder, FiActivity, FiUpload, FiTrash2 } from "react-icons/fi";
 import { supabase } from "../../lib/supabase";
+import { useAuthStore } from "../../lib/authStore";
+import { useWorkspaceStore } from "../../lib/workspaceStore";
 import { useWorkspaceMembers } from "../../lib/useWorkspaceMembers";
 import { useTasks } from "../tasks/useTasks";
 import TaskBoard from "../tasks/TaskBoard";
 import TaskList from "../tasks/TaskList";
 import TaskModal from "../tasks/TaskModal";
 import EmptyState from "../shared/EmptyState";
-import { resolveStorageUrl } from "../../lib/storage";
+import { resolveStorageUrl, uploadFile } from "../../lib/storage";
 
 const TABS = ["Overview", "Tasks", "Board", "Milestones", "Files", "Activity"];
 const TAB_ICONS = {
@@ -27,6 +30,9 @@ const ProjectDetail = ({ workspaceId, projectId, project, onBack, onProjectChang
   const [milestones, setMilestones] = useState([]);
   const [files, setFiles] = useState([]);
   const [activity, setActivity] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const profile = useAuthStore((s) => s.profile);
+  const can = useWorkspaceStore((s) => s.can);
 
   useEffect(() => {
     if (tab === "Milestones") {
@@ -78,6 +84,46 @@ const ProjectDetail = ({ workspaceId, projectId, project, onBack, onProjectChang
     setMilestones((prev) => prev.map((x) => (x.id === m.id ? { ...x, completed_at } : x)));
   };
 
+  const deleteProject = async () => {
+    if (!window.confirm(`Delete "${project.name}" and its project data? This cannot be undone.`)) return;
+    const { error } = await supabase.from("projects").delete().eq("id", projectId);
+    if (error) return toast.error(error.message);
+    toast.success("Project deleted.");
+    onProjectChanged?.();
+    onBack();
+  };
+
+  const uploadProjectFiles = async (event) => {
+    const selected = Array.from(event.target.files || []);
+    if (!selected.length) return;
+    setUploading(true);
+    try {
+      const rows = [];
+      for (const file of selected) {
+        const url = await uploadFile(`${workspaceId}/projects/${projectId}`, file);
+        rows.push({
+          workspace_id: workspaceId,
+          project_id: projectId,
+          uploaded_by: profile.id,
+          name: file.name,
+          url,
+          type: file.type,
+          size: file.size,
+        });
+      }
+      const { error } = await supabase.from("files").insert(rows);
+      if (error) throw error;
+      const resolved = await Promise.all(rows.map(async (file, index) => ({ ...file, id: `${Date.now()}-${index}`, url: await resolveStorageUrl(file.url) })));
+      setFiles((current) => [...resolved, ...current]);
+      toast.success(`${rows.length} file${rows.length === 1 ? "" : "s"} uploaded.`);
+    } catch (error) {
+      toast.error(error.message || "Project file upload failed.");
+    } finally {
+      event.target.value = "";
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="nx-page">
       <button type="button" className="nx-btn nx-btn-ghost nx-btn-sm" onClick={onBack} style={{ marginBottom: 10 }}>
@@ -89,9 +135,18 @@ const ProjectDetail = ({ workspaceId, projectId, project, onBack, onProjectChang
           <h2>{project.name}</h2>
           {project.description && <p className="nx-muted" style={{ fontSize: 13, marginTop: 4 }}>{project.description}</p>}
         </div>
-        <button type="button" className="nx-btn nx-btn-primary" onClick={() => setTaskModal("new")}>
-          <FiPlus size={14} /> Add task
-        </button>
+        <div className="nx-row">
+          {can("manage_projects") && (
+            <button type="button" className="nx-btn nx-btn-danger" onClick={deleteProject}>
+              <FiTrash2 size={14} /> Delete project
+            </button>
+          )}
+          {can("create_tasks") && (
+            <button type="button" className="nx-btn nx-btn-primary" onClick={() => setTaskModal("new")}>
+              <FiPlus size={14} /> Add & assign task
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="project-tabs">
@@ -147,13 +202,21 @@ const ProjectDetail = ({ workspaceId, projectId, project, onBack, onProjectChang
       )}
 
       {tab === "Files" && (
-        files.length === 0 ? <EmptyState title="No files" description="Files shared in this project's messages will appear here." /> : (
-          <div className="project-grid">
-            {files.map((f) => (
-              <a key={f.id} href={f.url} target="_blank" rel="noreferrer" className="nx-card">{f.name}</a>
-            ))}
-          </div>
-        )
+        <div>
+          {can("upload_files") && (
+            <label className={`nx-btn nx-btn-primary ${uploading ? "is-disabled" : ""}`} style={{ marginBottom: 14 }}>
+              <FiUpload size={14} /> {uploading ? "Uploading..." : "Upload project files"}
+              <input type="file" multiple hidden disabled={uploading} onChange={uploadProjectFiles} />
+            </label>
+          )}
+          {files.length === 0 ? <EmptyState title="No project files" description="Upload documents, images, or other files for this project." /> : (
+            <div className="project-grid">
+              {files.map((f) => (
+                <a key={f.id} href={f.url} target="_blank" rel="noreferrer" className="nx-card">{f.name}</a>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {tab === "Activity" && (

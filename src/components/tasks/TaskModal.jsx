@@ -5,6 +5,7 @@ import Avatar from "../shared/Avatar";
 import { supabase } from "../../lib/supabase";
 import { useAuthStore } from "../../lib/authStore";
 import { TASK_STATUSES, TASK_PRIORITIES } from "./constants";
+import { requestTaskHelp } from "../../lib/taskHelp";
 
 const TaskModal = ({ workspaceId, projectId, task, members, onClose, onSave, onDelete }) => {
   const isEdit = !!task;
@@ -21,7 +22,11 @@ const TaskModal = ({ workspaceId, projectId, task, members, onClose, onSave, onD
   const [newItem, setNewItem] = useState("");
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [showHelp, setShowHelp] = useState(false);
+  const [helperId, setHelperId] = useState("");
+  const [requestingHelp, setRequestingHelp] = useState(false);
   const profile = useAuthStore((s) => s.profile);
+  const canRequestHelp = isEdit && (task.created_by === profile?.id || task.assignee_id === profile?.id);
 
   useEffect(() => {
     if (!task) return;
@@ -82,6 +87,21 @@ const TaskModal = ({ workspaceId, projectId, task, members, onClose, onSave, onD
       .single();
     setComments((prev) => [...prev, data]);
     setNewComment("");
+  };
+
+  const askForHelp = async () => {
+    if (!helperId) return;
+    setRequestingHelp(true);
+    try {
+      await requestTaskHelp({ workspaceId, task, requester: profile, helperId });
+      toast.success("Help request sent by direct message.");
+      setShowHelp(false);
+      setHelperId("");
+    } catch (error) {
+      toast.error(error.code === "23505" ? "That teammate already has a pending request." : error.message);
+    } finally {
+      setRequestingHelp(false);
+    }
   };
 
   return (
@@ -159,6 +179,31 @@ const TaskModal = ({ workspaceId, projectId, task, members, onClose, onSave, onD
                 <button type="button" className="nx-btn nx-btn-sm" onClick={addComment}>Post</button>
               </div>
             </div>
+          </>
+        )}
+
+        {canRequestHelp && (
+          <>
+            <hr className="nx-divider" />
+            {!showHelp ? (
+              <button type="button" className="nx-btn" onClick={() => setShowHelp(true)}>Ask a teammate for help</button>
+            ) : (
+              <div className="nx-field">
+                <label>Select a teammate</label>
+                <div className="nx-row">
+                  <select className="nx-select" value={helperId} onChange={(e) => setHelperId(e.target.value)}>
+                    <option value="">Choose teammate</option>
+                    {members?.filter((member) => member.user_id !== profile?.id && member.status === "active").map((member) => (
+                      <option key={member.user_id} value={member.user_id}>{member.profile?.username}</option>
+                    ))}
+                  </select>
+                  <button type="button" className="nx-btn nx-btn-primary" disabled={!helperId || requestingHelp} onClick={askForHelp}>
+                    {requestingHelp ? "Sending..." : "Send request"}
+                  </button>
+                  <button type="button" className="nx-btn" onClick={() => setShowHelp(false)}>Cancel</button>
+                </div>
+              </div>
+            )}
           </>
         )}
 

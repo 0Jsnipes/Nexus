@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import { supabase } from "../../lib/supabase";
 import { uploadFile } from "../../lib/storage";
 import { useWorkspaceStore } from "../../lib/workspaceStore";
+import { useAuthStore } from "../../lib/authStore";
 import { PENDING_JOIN_CODE_KEY, JOIN_ERROR_MESSAGES } from "../../lib/joinWorkspaceCode";
 import Logo from "../shared/Logo";
 
@@ -23,13 +24,17 @@ const COPY = {
     title: "Reset your password",
     subtitle: "We'll email you a link to get back in.",
   },
+  recovery: {
+    title: "Choose a new password",
+    subtitle: "Secure your Nexus account with a new password.",
+  },
 };
 
 const cleanEmail = (value) => String(value || "").trim().toLowerCase().slice(0, 254);
 const cleanUsername = (value) => String(value || "").trim().normalize("NFKC").slice(0, 50);
 
-const Auth = () => {
-  const [view, setView] = useState("signin"); // "signin" | "signup" | "forgot"
+const Auth = ({ initialView = "signin" }) => {
+  const [view, setView] = useState(initialView); // "signin" | "signup" | "forgot" | "recovery"
   const [avatar, setAvatar] = useState({ file: null, url: "" });
   const [loading, setLoading] = useState(false);
 
@@ -147,12 +152,32 @@ const Auth = () => {
     const form = Object.fromEntries(new FormData(e.target));
     const email = cleanEmail(form.email);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/?recovery=1`,
+    });
     if (error) console.warn("Password reset request failed", error.code || error.status || "auth_error");
 
     // Deliberately use the same response whether an account exists or not.
     toast.success("If an account exists for that email, a password reset link has been sent.");
     goTo("signin");
+    setLoading(false);
+  };
+
+  const handleRecovery = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    const { password, confirmPassword } = Object.fromEntries(new FormData(e.target));
+    if (password !== confirmPassword) return toast.warn("Passwords do not match.");
+    if (!PASSWORD_REQUIREMENTS.test(String(password || ""))) {
+      return toast.warn("Password must be 12–128 characters and include uppercase, lowercase, a number, and a symbol.");
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) toast.error(error.message);
+    else {
+      useAuthStore.getState().finishPasswordRecovery();
+      toast.success("Password updated.");
+    }
     setLoading(false);
   };
 
@@ -266,7 +291,22 @@ const Auth = () => {
             </form>
           )}
 
-          {view !== "forgot" && (
+          {view === "recovery" && (
+            <form className="auth-form" onSubmit={handleRecovery}>
+              <div className="auth-field">
+                <label htmlFor="recovery-password">New password</label>
+                <input id="recovery-password" type="password" name="password" minLength={12} maxLength={128} required />
+              </div>
+              <div className="auth-field">
+                <label htmlFor="recovery-confirm">Confirm password</label>
+                <input id="recovery-confirm" type="password" name="confirmPassword" minLength={12} maxLength={128} required />
+              </div>
+              <span className="auth-hint">12+ characters with uppercase, lowercase, a number, and a symbol.</span>
+              <button className="auth-submit" disabled={loading}>{loading ? "Updating…" : "Update password"}</button>
+            </form>
+          )}
+
+          {view !== "forgot" && view !== "recovery" && (
             <p className="auth-legal">
               By continuing you agree to our <a href="#/terms">Terms of Service</a> and <a href="#/privacy">Privacy Policy</a>.
             </p>
